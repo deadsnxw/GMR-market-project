@@ -5,6 +5,8 @@ import ProductInfo from './components/ProductInfo';
 import UserContext from './context/UserContext';
 import UserProfile from './components/Profile/UserProfile';
 import { PrivateUserRoot } from './components/PrivateRoute';
+import MainPage from "./components/MainPage";
+import HeaderComponent from "./components/HeaderComponent";
 
 
 function App() {
@@ -27,8 +29,9 @@ function App() {
     <div className="App">
       <UserContext.Provider value={{user, setUser}}>
         <Router>
+          <HeaderComponent></HeaderComponent>
           <Routes>
-            <Route path='/' element={<div></div>}></Route>
+            <Route path='/' element={<MainPage></MainPage>}></Route>
             <Route path='/product/:productId' element={<ProductInfo></ProductInfo>}></Route>
             <Route path='/me' element={<PrivateUserRoot component={<UserProfile></UserProfile>}></PrivateUserRoot>}></Route>
             <Route path='/product/:productId/edit' element={<div></div>}></Route>
