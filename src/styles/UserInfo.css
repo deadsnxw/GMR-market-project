@@ -1,0 +1,45 @@
+.user-info ul, .user-editing ul {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 2rem;
+}
+
+.user-info li, .user-editing li {
+  padding: 1rem 0;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.user-info li:last-child, .user-editing li:last-child {
+  border-bottom: none;
+}
+
+.user-info li span:first-child {
+  font-weight: 500;
+  color: #34495e;
+}
+
+button {
+  padding: 0.7rem 1.2rem;
+  margin-right: 1rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+button:hover {
+  transform: translateY(-1px);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+button:focus {
+  outline: none;
+}
