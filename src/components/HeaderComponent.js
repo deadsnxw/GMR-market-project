@@ -4,6 +4,7 @@ import {useContext} from "react";
 
 export default function HeaderComponent() {
     const {user} = useContext(userContext);
+    const balance = user ? user.balance ?? 0 : null;
 
     return (
         <header className="header">
@@ -11,6 +12,7 @@ export default function HeaderComponent() {
                 <img src="/logo192.png" alt="Logo"/>
             </div>
             <nav className="nav">
+                {user && balance !== null && <span>{balance}</span>}
                 <img src={"/userpic.png"}
                      alt="User"
                      className="user-pic"
