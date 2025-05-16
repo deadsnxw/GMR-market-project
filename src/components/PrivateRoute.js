@@ -6,7 +6,7 @@ export function PrivateUserRoot ({component}){
     const {user} = useContext(UserContext);
 
     if (!user) return <Navigate to="/login" />;
-    if (user.isShop) return <div />;
+    if (user.isShop) return <Navigate to="/me" />;
     return component;
 }
 

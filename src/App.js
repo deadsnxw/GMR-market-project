@@ -37,7 +37,7 @@ function App() {
             <Route path='/me' element={<PrivateUserRoot component={<UserProfile></UserProfile>}></PrivateUserRoot>}></Route>
             <Route path='/product/:productId/edit' element={<div></div>}></Route>
             <Route path='/login' element={<div></div>}></Route>
-            <Route path='/balance' element={<Balance></Balance>}></Route>
+            <Route path='/balance' element={<PrivateUserRoot component={<Balance></Balance>}></PrivateUserRoot>}></Route>
           </Routes>
         </Router>
       </UserContext.Provider>
