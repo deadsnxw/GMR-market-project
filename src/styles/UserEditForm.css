@@ -40,3 +40,10 @@ button:active {
 button:focus {
   outline: none;
 }
+
+.error {
+  color: #e74c3c;
+  font-size: 0.8rem;
+  margin-top: 0.2rem;
+  display: block;
+}

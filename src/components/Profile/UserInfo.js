@@ -18,6 +18,11 @@ export default function UserInfo ({user, setIsEditing}){
                 <li>
                     Password: ********
                 </li>
+                {!user.isShop &&
+                <li>
+                    Balance: {user.balance}$
+                </li>
+                }
             </ul>
             <button onClick={handleEdit}>Edit Profile</button>
         </div>

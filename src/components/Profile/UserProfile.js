@@ -21,6 +21,7 @@ export default function UserProfile(){
     }
 
     useEffect(() => {
+        //TODO: If user is a shop, you should fetch it products, not purchased
         fetch("/shortProducts/shortProducts.json")
         .then((response) => response.json())
         .then((data) => {
@@ -50,7 +51,7 @@ export default function UserProfile(){
                     <UserInfo user={user} setIsEditing={setIsEditing}></UserInfo>
                 }
             </div>
-            <h1>Purchased Products</h1>
+            <h1>{user.isShop ? 'Your' : 'Purchased'} Products</h1>
             <div className="purchased-products-container">
                 <button onClick={()=>handleCardChange('prev')}>&lt;</button>
                 <div className="purchased-products">
@@ -59,8 +60,7 @@ export default function UserProfile(){
                     ))}
                 </div>
                 <button onClick={()=>handleCardChange('next')}>&gt;</button>
-            </div>
-            
+            </div>   
         </>
     );
 }
