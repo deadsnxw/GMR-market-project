@@ -7,6 +7,7 @@ import UserProfile from './components/Profile/UserProfile';
 import { PrivateUserRoot } from './components/PrivateRoute';
 import MainPage from "./components/MainPage";
 import HeaderComponent from "./components/HeaderComponent";
+import Balance from "./components/Balance";
 
 
 function App() {
@@ -36,6 +37,7 @@ function App() {
             <Route path='/me' element={<PrivateUserRoot component={<UserProfile></UserProfile>}></PrivateUserRoot>}></Route>
             <Route path='/product/:productId/edit' element={<div></div>}></Route>
             <Route path='/login' element={<div></div>}></Route>
+            <Route path='/balance' element={<Balance></Balance>}></Route>
           </Routes>
         </Router>
       </UserContext.Provider>
