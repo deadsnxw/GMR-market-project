@@ -3,5 +3,5 @@
     "name": "Valentyn",
     "mail": "prux@gmail.com",
     "balance": 1000,
-    "isShop": true
+    "isShop": false
 }

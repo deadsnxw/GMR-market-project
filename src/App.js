@@ -8,23 +8,24 @@ import { PrivateUserRoot } from './components/PrivateRoute';
 import MainPage from "./components/MainPage";
 import HeaderComponent from "./components/HeaderComponent";
 import Balance from "./components/Balance";
+import Login from "./components/Login";
 
 
 function App() {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(()=>{
-    fetch("/user.json")
-    .then((response) => response.json())
-    .then((data) => {
-      setUser(data);
-      setLoading(false);
-    });
-  },[])
-
-
-  if(loading) return <div>Loading...</div>
+  // const [loading, setLoading] = useState(true);
+  //
+  // useEffect(()=>{
+  //   fetch("/user.json")
+  //   .then((response) => response.json())
+  //   .then((data) => {
+  //     setUser(data);
+  //     setLoading(false);
+  //   });
+  // },[])
+  //
+  //
+  // if(loading) return <div>Loading...</div>
 
   return (
     <div className="App">
@@ -36,7 +37,7 @@ function App() {
             <Route path='/product/:productId' element={<ProductInfo></ProductInfo>}></Route>
             <Route path='/me' element={<PrivateUserRoot component={<UserProfile></UserProfile>}></PrivateUserRoot>}></Route>
             <Route path='/product/:productId/edit' element={<div></div>}></Route>
-            <Route path='/login' element={<div></div>}></Route>
+            <Route path='/login' element={<Login></Login>}></Route>
             <Route path='/balance' element={<PrivateUserRoot component={<Balance></Balance>}></PrivateUserRoot>}></Route>
           </Routes>
         </Router>
