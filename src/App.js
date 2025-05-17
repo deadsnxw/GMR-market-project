@@ -9,6 +9,7 @@ import MainPage from "./components/MainPage";
 import HeaderComponent from "./components/HeaderComponent";
 import Balance from "./components/Balance";
 import Login from "./components/Login";
+import Register from "./components/Register";
 
 
 function App() {
@@ -39,6 +40,7 @@ function App() {
             <Route path='/product/:productId/edit' element={<div></div>}></Route>
             <Route path='/login' element={<Login></Login>}></Route>
             <Route path='/balance' element={<PrivateUserRoot component={<Balance></Balance>}></PrivateUserRoot>}></Route>
+            <Route path='/register' element={<Register></Register>}></Route>
           </Routes>
         </Router>
       </UserContext.Provider>
