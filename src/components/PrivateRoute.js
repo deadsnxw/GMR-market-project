@@ -15,3 +15,9 @@ export function PrivateShopRoot ({component}){
 
     return user.shop ? component : <Navigate to="/login" />
 }
+
+export function PrivateGuestRoot ({component}){
+    const {user} = useContext(UserContext);
+
+    return !user ? component : <Navigate to="/" />
+}

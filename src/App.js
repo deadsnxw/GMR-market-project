@@ -1,10 +1,10 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState} from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import './App.css';
 import ProductInfo from './components/ProductInfo';
-import UserContext from './context/UserContext';
+import {UserProvider} from './context/UserContext';
 import UserProfile from './components/Profile/UserProfile';
-import { PrivateUserRoot } from './components/PrivateRoute';
+import {PrivateGuestRoot, PrivateUserRoot} from './components/PrivateRoute';
 import MainPage from "./components/MainPage";
 import HeaderComponent from "./components/HeaderComponent";
 import Balance from "./components/Balance";
@@ -13,38 +13,23 @@ import Register from "./components/Register";
 
 
 function App() {
-  const [user, setUser] = useState(null);
-  // const [loading, setLoading] = useState(true);
-  //
-  // useEffect(()=>{
-  //   fetch("/user.json")
-  //   .then((response) => response.json())
-  //   .then((data) => {
-  //     setUser(data);
-  //     setLoading(false);
-  //   });
-  // },[])
-  //
-  //
-  // if(loading) return <div>Loading...</div>
-
   return (
-    <div className="App">
-      <UserContext.Provider value={{user, setUser}}>
+      <div className="App">
         <Router>
-          <HeaderComponent></HeaderComponent>
-          <Routes>
-            <Route path='/' element={<MainPage></MainPage>}></Route>
-            <Route path='/product/:productId' element={<ProductInfo></ProductInfo>}></Route>
-            <Route path='/me' element={<PrivateUserRoot component={<UserProfile></UserProfile>}></PrivateUserRoot>}></Route>
-            <Route path='/product/:productId/edit' element={<div></div>}></Route>
-            <Route path='/login' element={<Login></Login>}></Route>
-            <Route path='/balance' element={<PrivateUserRoot component={<Balance></Balance>}></PrivateUserRoot>}></Route>
-            <Route path='/register' element={<Register></Register>}></Route>
-          </Routes>
+          <UserProvider>
+            <HeaderComponent />
+            <Routes>
+              <Route path='/' element={<MainPage />} />
+              <Route path='/product/:productId' element={<ProductInfo />} />
+              <Route path='/me' element={<PrivateUserRoot component={<UserProfile />} />} />
+              <Route path='/product/:productId/edit' element={<div />} />
+              <Route path='/login' element={<PrivateGuestRoot component={<Login />} />} />
+              <Route path='/balance' element={<PrivateUserRoot component={<Balance />} />} />
+              <Route path='/register' element={<PrivateGuestRoot component={<Register />} />} />
+            </Routes>
+          </UserProvider>
         </Router>
-      </UserContext.Provider>
-    </div>
+      </div>
   );
 }
 
