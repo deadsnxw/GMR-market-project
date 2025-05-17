@@ -17,6 +17,7 @@ export default function Register() {
     const validateInputs = () => {
         const newErrors = {};
         if (!username.trim()) newErrors.username = "Username is required.";
+        if (username.trim().length > 16) newErrors.username = "Username must be less than 16 characters.";
         if (!email.trim() || !/\S+@\S+\.\S+/.test(email)) newErrors.email = "Valid email is required.";
         if (!password.trim() || password.length < 6) newErrors.password = "Password must be at least 6 characters.";
         return newErrors;
