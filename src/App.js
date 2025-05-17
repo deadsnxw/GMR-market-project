@@ -8,7 +8,7 @@ import { PrivateUserRoot, PrivateLoggedRoot, PrivateShopRoot } from './component
 import MainPage from "./components/MainPage";
 import HeaderComponent from "./components/HeaderComponent";
 import Balance from "./components/Balance";
-import CreateProduct from './components/CreateProduct';
+import CreateProduct from './components/CreateProduct/CreateProduct';
 
 
 function App() {

@@ -39,10 +39,6 @@ export default function UserEditForm ({ setIsEditing }){
 
     const handleConfirm = () =>{
         const newErrors = {};
-        console.log(name.length < usernameMinLength);
-        console.log(mail.length < mailMinLength || !mail.includes('@'));
-        console.log(newPassword && newPassword.length < passwordMinLength);
-        console.log(newPassword && password.length < passwordMinLength);
 
         if (name.length < usernameMinLength) {
             newErrors.name = `Name must be at least ${usernameMinLength} characters`;
