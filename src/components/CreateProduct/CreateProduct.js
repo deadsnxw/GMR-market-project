@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import TagComponent from "./TagComponent";
 import "../../styles/CreateProduct.css"
+import ImageComponent from "./ImageComponent";
 
 export default function CreateProduct (){
 
+    const [images, setImages] = useState([]);
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [amount, setAmount] = useState('');
@@ -12,6 +14,7 @@ export default function CreateProduct (){
     const [errors, setErrors] = useState({});
     const productNameMinLength = 6;
     const descriptionMinLength = 15;
+    const imagesMaxAmount = 6;
     const productTags = ["electronics", "clothing", "home", "kitchen", "furniture", "smartphone", "laptop", "headphones", "wearable", "gadget", "men", "women", "kids", "summer", "winter", "appliances", "decor", "cookware", "utensils", "storage", "sports", "outdoor", "fitness", "beauty", "skincare", "organic", "sustainable", "luxury", "budget", "premium", "new", "sale", "bestseller", "limited"];
 
     const changeStrategy = {
@@ -20,6 +23,30 @@ export default function CreateProduct (){
         'amount': (value)=>{setAmount(value)},
         'price': (value)=>{setPrice(value)},
     };
+
+    const processImages = (files) => {
+        const imageFiles = Array.from(files).filter(file => file.type.match('image.*'));
+        
+        if (imageFiles.length === 0) {
+            alert('Пожалуйста, выберите хотя бы одно изображение');
+            return;
+        }
+
+        imageFiles.forEach(file => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                setImages(prev => prev.includes(e.target.result) ? prev : [...prev, e.target.result]);
+            };
+            reader.readAsDataURL(file);
+        });
+    };
+
+    const handleFileInput = useCallback((e) => {
+        const files = e.target.files;
+        if (files && files.length > 0) {
+            processImages(files);
+        }
+    }, []);
 
     const isValidPrice = (num) =>{
         if (num.indexOf('.') === -1) return false;
@@ -68,10 +95,39 @@ export default function CreateProduct (){
         <>
             <div className="create-product">
                 <h1>Create Product</h1>
-                <div className="product-images">
-                    <div className="photo-dropper">
-                        Drop Photo Of Product Here
+                <div className="images-input">
+                    <p className="image-hint">Click On Image To Delete</p>
+                    <div className="product-images">
+                        {images.map(image => <ImageComponent key={image} setImages={setImages} image={image}></ImageComponent>)}
                     </div>
+                    {images.length < imagesMaxAmount && <div 
+                        className="file-upload-area"
+                        onClick={() => document.getElementById('file-input').click()}
+                        onDragOver={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                        }}
+                        onDragEnter={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                        }}
+                        onDrop={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            if (e.dataTransfer.files[0]) {
+                                handleFileInput({ target: { files: e.dataTransfer.files } });
+                            }
+                        }}
+                        >
+                            Drop/Chose Image Here
+                            <input 
+                                id="file-input"
+                                type="file" 
+                                accept="image/*"
+                                onChange={handleFileInput}
+                                style={{ display: 'none' }} 
+                            />
+                    </div>}
                 </div>
 
                 <ul>
