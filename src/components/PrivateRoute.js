@@ -22,3 +22,9 @@ export function PrivateLoggedRoot ({component}){
 
     return user ? component : <Navigate to="/login" />
 }
+
+export function PrivateGuestRoot ({component}){
+    const {user} = useContext(UserContext);
+
+    return !user ? component : <Navigate to="/" />
+}

@@ -10,9 +10,9 @@ export default function UserEditForm ({ setIsEditing }){
     const [password, setPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [errors, setErrors] = useState({});
-    const usernameMinLength = 3;
-    const mailMinLength = 5;
-    const passwordMinLength = 8;
+    const usernameMinLength = 1;
+    const usernameMaxLength = 16;
+    const passwordMinLength = 6;
 
     const changeStrategy ={
         'name': (value)=>{setName(value);},
@@ -44,7 +44,7 @@ export default function UserEditForm ({ setIsEditing }){
             newErrors.name = `Name must be at least ${usernameMinLength} characters`;
         }
 
-        if (mail.length < mailMinLength || !mail.includes('@')) {
+        if (!mail.includes('@')) {
             newErrors.mail = 'Please enter a valid email address';
         }
 

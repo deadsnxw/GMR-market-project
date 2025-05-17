@@ -12,7 +12,8 @@ export default function CreateProduct (){
     const [price, setPrice] = useState('');
     const [tags, setTags] = useState('');
     const [errors, setErrors] = useState({});
-    const productNameMinLength = 6;
+    const productNameMinLength = 4;
+    const productNameMaxLength = 16;
     const descriptionMinLength = 15;
     const imagesMaxAmount = 6;
     const productTags = ["electronics", "clothing", "home", "kitchen", "furniture", "smartphone", "laptop", "headphones", "wearable", "gadget", "men", "women", "kids", "summer", "winter", "appliances", "decor", "cookware", "utensils", "storage", "sports", "outdoor", "fitness", "beauty", "skincare", "organic", "sustainable", "luxury", "budget", "premium", "new", "sale", "bestseller", "limited"];
