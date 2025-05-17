@@ -31,3 +31,7 @@ form span:hover {
     color: blue;
     text-decoration: underline;
 }
+
+.error {
+    color: red;
+}
