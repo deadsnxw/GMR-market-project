@@ -4,11 +4,11 @@ import './App.css';
 import ProductInfo from './components/ProductInfo';
 import UserContext from './context/UserContext';
 import UserProfile from './components/Profile/UserProfile';
-import { PrivateUserRoot, PrivateLoggedRoot, PrivateShopRoot } from './components/PrivateRoute';
+import { PrivateUserRoot, PrivateLoggedRoot, PrivateShopRoot, PrivateShopCreatedRoot } from './components/PrivateRoute';
 import MainPage from "./components/MainPage";
 import HeaderComponent from "./components/HeaderComponent";
 import Balance from "./components/Balance";
-import CreateProduct from './components/CreateProduct/CreateProduct';
+import CreateProduct from './components/CreateEditProduct/CreateEditProduct';
 
 
 function App() {
@@ -37,7 +37,7 @@ function App() {
             <Route path='/product/:productId' element={<ProductInfo></ProductInfo>}></Route>
             <Route path='/me' element={<PrivateLoggedRoot component={<UserProfile></UserProfile>}></PrivateLoggedRoot>}></Route>
             <Route path='/me/create' element={<PrivateShopRoot component={<CreateProduct></CreateProduct>}></PrivateShopRoot>}></Route>
-            <Route path='/product/:productId/edit' element={<div></div>}></Route>
+            <Route path='/product/:productId/edit' element={<PrivateShopCreatedRoot component={<CreateProduct isEditing={true}></CreateProduct>}></PrivateShopCreatedRoot>}></Route>
             <Route path='/login' element={<div></div>}></Route>
             <Route path='/balance' element={<PrivateUserRoot component={<Balance></Balance>}></PrivateUserRoot>}></Route>
           </Routes>
