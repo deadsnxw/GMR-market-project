@@ -1,10 +1,10 @@
 import React from "react";
 import "../../styles/ImageComponent.css"
 
-export default function ImageComponent ({setImages, image}){
+export default function ImageComponent ({setForm, image}){
 
     const handleClick = () =>{
-        setImages(prev=> prev.filter(img=> img !== image));
+        setForm(prev=> ({...prev, images: prev.images.filter(img=> img !== image)}));
     }
 
     return(

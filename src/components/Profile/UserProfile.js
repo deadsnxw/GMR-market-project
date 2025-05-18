@@ -4,8 +4,10 @@ import ProductCard from "../ProductCard";
 import UserEditForm from "./UserEditForm";
 import UserInfo from "./UserInfo";
 import '../../styles/UserProfile.css';
+import { useNavigate } from "react-router-dom";
 
 export default function UserProfile(){
+    const navigate = useNavigate();
     const {user} = useContext(UserContext);
 
     const [purchased, setPurchased] = useState([]);
@@ -42,7 +44,7 @@ export default function UserProfile(){
     if(loading) return <div>Loading...</div>
 
     return(
-        <>
+        <div className="user-page">
             <div className="user-profile">
                 <h1>Welcome, {user.name}</h1>
                 {isEditing ? 
@@ -52,15 +54,16 @@ export default function UserProfile(){
                 }
             </div>
             <h1>{user.isShop ? 'Your' : 'Purchased'} Products</h1>
-            <div className="purchased-products-container">
+            <div className="products-container">
                 <button onClick={()=>handleCardChange('prev')}>&lt;</button>
-                <div className="purchased-products">
+                <div className="products">
                     {getCurrentCards().map(product => (
                         <ProductCard key={product.id} product={product} />
                     ))}
                 </div>
                 <button onClick={()=>handleCardChange('next')}>&gt;</button>
-            </div>   
-        </>
+            </div>
+            {user.isShop && <button onClick={()=> navigate('/me/create')}>Add New Product</button>}
+        </div>
     );
 }

@@ -7,16 +7,18 @@ import { useNavigate } from "react-router-dom";
 export default function CreateEditProduct ({isEditing = false}){
 
     const navigate = useNavigate();
-    const [images, setImages] = useState([]);
-    const [name, setName] = useState('');
-    const [description, setDescription] = useState('');
-    const [amount, setAmount] = useState('');
-    const [price, setPrice] = useState('');
-    const [tags, setTags] = useState('');
+    const [form, setForm] = useState({
+        images: [],
+        name: '',
+        description: '',
+        amount: '',
+        price: '',
+        tags: ''
+    });
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(isEditing);
     const productNameMinLength = 4;
-    const productNameMaxLength = 16;
+    const productNameMaxLength = 30;
     const descriptionMinLength = 15;
     const imagesMaxAmount = 6;
     const productTags = ["electronics", "clothing", "home", "kitchen", "furniture", "smartphone", "laptop", "headphones", "wearable", "gadget", "men", "women", "kids", "summer", "winter", "appliances", "decor", "cookware", "utensils", "storage", "sports", "outdoor", "fitness", "beauty", "skincare", "organic", "sustainable", "luxury", "budget", "premium", "new", "sale", "bestseller", "limited"];
@@ -26,22 +28,44 @@ export default function CreateEditProduct ({isEditing = false}){
            fetch("/product.json")
             .then((response) => response.json())
             .then((data) => {
-                setImages(data.images);
-                setName(data.name);
-                setDescription(data.description);
-                setAmount(data.amount);
-                setPrice(`${data.price}`);
-                setTags(data.tags);
+                setForm({
+                    images: data.images,
+                    name: data.name,
+                    description: data.description,
+                    amount: data.amount,
+                    price: `${data.price}`,
+                    tags: data.tags
+                });
                 setLoading(false);
             }); 
         }
     }, [isEditing]);
 
-    const changeStrategy = {
-        'name': (value)=>{setName(value)},
-        'description': (value)=>{setDescription(value)},
-        'amount': (value)=>{setAmount(value)},
-        'price': (value)=>{setPrice(value)},
+    const validatorsStrategy = {
+        images: (value) => value.length <= 0 ? 'Must be at least 1 photo' : null,
+        name: (value) => (
+            value.length < productNameMinLength || value.length > productNameMaxLength
+            ? `Name must be ${productNameMinLength}-${productNameMaxLength} characters`
+            : null
+        ),
+        description: (value) => (
+            value.length < descriptionMinLength
+            ? `Description must be at least ${descriptionMinLength} characters`
+            : null
+        ),
+        amount: (value) => {
+            const num = Number(value);
+            return isNaN(num) || !Number.isInteger(num) || num <= 0 
+            ? 'Enter valid amount' 
+            : null;
+        },
+        price: (value) => {
+            const num = Number(value);
+            return isNaN(num) || isValidPrice(value) || num <= 0
+            ? 'Enter valid price'
+            : null;
+        },
+        tags: (value) => value.length <= 0 ? 'Must be at least 1 tag' : null
     };
 
     const buttonsStrategy = {
@@ -59,7 +83,15 @@ export default function CreateEditProduct ({isEditing = false}){
         imageFiles.forEach(file => {
             const reader = new FileReader();
             reader.onload = (e) => {
-                setImages(prev => prev.includes(e.target.result) ? prev : [...prev, e.target.result]);
+                setForm(prev => {
+                    if (prev.images.includes(e.target.result)) {
+                        return prev;
+                    }
+                    return {
+                        ...prev,
+                        images: [...prev.images, e.target.result]
+                    };
+                });
             };
             reader.readAsDataURL(file);
         });
@@ -79,39 +111,19 @@ export default function CreateEditProduct ({isEditing = false}){
         return decimalPart.length > 2;
     };
 
-    const handleChange = (e, strategy) =>{
-        const value = e.target.value;
-        changeStrategy[strategy](value);
+    const handleChange = (e, field) => {
+        setForm(prev => ({
+            ...prev,
+            [field]: e.target.value
+        }));
     };
 
     const handleSubmit = () =>{
-        const newErrors = {};
-        const numberAmount = Number(amount);
-        const priceNumber = Number(price);
-
-        if (images.length <= 0) {
-            newErrors.img = `Must be at least 1 photo`;
-        }
-
-        if (name.length < productNameMinLength && name.length > productNameMaxLength) {
-            newErrors.name = `Name must be ${productNameMinLength}-${productNameMaxLength} characters`;
-        }
-
-        if (description.length < descriptionMinLength) {
-            newErrors.description = `Description must be at least ${descriptionMinLength} characters`;
-        }
-
-        if (isNaN(numberAmount) || !Number.isInteger(numberAmount) || numberAmount <= 0) {
-            newErrors.amount = 'Enter valid amount';
-        }
-
-        if (isNaN(priceNumber) || isValidPrice(price) || priceNumber <= 0) {
-            newErrors.price = 'Enter valid price';
-        }
-
-        if (tags.length <= 0) {
-            newErrors.tag = `Must be at least 1 tag`;
-        }
+        const newErrors = Object.entries(form).reduce((acc, [field, value]) => {
+            const error = validatorsStrategy[field](value);
+            if (error) acc[field] = error;
+            return acc;
+        }, {});
 
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
@@ -126,6 +138,11 @@ export default function CreateEditProduct ({isEditing = false}){
         buttonsStrategy[strategy]();
     }
 
+    const preventDef = (e) =>{
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
     if(loading) return <div>Loading...</div>
 
     return(
@@ -135,28 +152,21 @@ export default function CreateEditProduct ({isEditing = false}){
                 <div className="images-input">
                     <p className="image-hint">Click On Image To Delete</p>
                     <div className="product-images">
-                        {images.map(image => <ImageComponent key={image} setImages={setImages} image={image}></ImageComponent>)}
+                        {form.images.map(image => <ImageComponent key={image} setForm={setForm} image={image}></ImageComponent>)}
                     </div>
-                    {images.length < imagesMaxAmount && <div 
+                    {form.images.length < imagesMaxAmount && <div 
                         className="file-upload-area"
                         onClick={() => document.getElementById('file-input').click()}
-                        onDragOver={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                        }}
-                        onDragEnter={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                        }}
+                        onDragOver={preventDef}
+                        onDragEnter={preventDef}
                         onDrop={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
+                            preventDef(e);
                             if (e.dataTransfer.files[0]) {
                                 handleFileInput({ target: { files: e.dataTransfer.files } });
                             }
                         }}
                         >
-                            Drop/Chose Image Here
+                            Drop/Choose Image Here
                             <input 
                                 id="file-input"
                                 type="file" 
@@ -166,14 +176,14 @@ export default function CreateEditProduct ({isEditing = false}){
                             />
                     </div>}
                 </div>
-                {errors.img && <span className="error">{errors.img}</span>}
+                {errors.images && <span className="error">{errors.images}</span>}
 
                 <ul>
                     <li>
                         Name: 
                         <input 
                         type="text" 
-                        value={name} 
+                        value={form.name} 
                         onChange={(e)=>handleChange(e, 'name')} 
                         placeholder="Enter product name..." />
                     </li>
@@ -181,7 +191,7 @@ export default function CreateEditProduct ({isEditing = false}){
                     <li>
                         Description: 
                         <textarea 
-                        value={description} 
+                        value={form.description} 
                         onChange={(e)=>handleChange(e, 'description')} 
                         placeholder="Enter product description..." />
                     </li>
@@ -190,7 +200,7 @@ export default function CreateEditProduct ({isEditing = false}){
                         Total Amount: 
                         <input 
                         type="text" 
-                        value={amount} 
+                        value={form.amount} 
                         onChange={(e)=>handleChange(e, 'amount')} 
                         placeholder="Enter amount of product..." />
                     </li>
@@ -199,7 +209,7 @@ export default function CreateEditProduct ({isEditing = false}){
                         Price: 
                         <input 
                         type="text" 
-                        value={price} 
+                        value={form.price} 
                         onChange={(e)=>handleChange(e, 'price')} 
                         placeholder="Enter product price..." />
                     </li>
@@ -207,16 +217,16 @@ export default function CreateEditProduct ({isEditing = false}){
                     <li>
                         Tags: 
                         <div className="tags-div">
-                            {productTags.map(name=><TagComponent key={name} tags={tags} setTags={setTags} name={name}></TagComponent>)}
+                            {productTags.map(name=><TagComponent key={name} tags={form.tags} setForm={setForm} name={name}></TagComponent>)}
                         </div>
                     </li>
-                    {errors.tag && <span className="error">{errors.tag}</span>}
+                    {errors.tags && <span className="error">{errors.tags}</span>}
                 </ul>
             </div>
             <div className="buttons">
                 {isEditing && <button onClick={()=>handleClick('delete')}>Delete</button>}
                 <button onClick={()=>handleClick('cancel')}>Cancel</button>
-                <button onClick={handleSubmit}>Create</button>
+                <button onClick={handleSubmit}>{isEditing ? 'Edit' : 'Create'}</button>
             </div>
         </>
     );

@@ -1,60 +1,45 @@
-import React, {useState, useEffect, useContext} from "react";
+import React, {useState, useContext} from "react";
 import UserContext from "../../context/UserContext";
 import "../../styles/UserEditForm.css"
 
 export default function UserEditForm ({ setIsEditing }){
     const {user, setUser} = useContext(UserContext);
 
-    const [name, setName] = useState(user.name);
-    const [mail, setMail] = useState(user.mail);
-    const [password, setPassword] = useState('');
-    const [newPassword, setNewPassword] = useState('');
+    const [form, setForm] = useState({
+        name: user.name,
+        mail: user.mail,
+        password: '',
+        newPassword: ''
+    });
     const [errors, setErrors] = useState({});
     const usernameMinLength = 1;
     const usernameMaxLength = 16;
     const passwordMinLength = 6;
 
-    const changeStrategy ={
-        'name': (value)=>{setName(value);},
-        'mail': (value)=>{setMail(value);},
-        'new-password': (value)=>{setNewPassword(value);},
-        'password': (value)=>{setPassword(value);}
-    };
-
-    useEffect(() => {
-        setName(user.name);
-        setMail(user.mail);
-    }, [user]);
-
-    const setPasswordsToDefault = () =>{
-        setPassword('');
-        setNewPassword('');
-    };
-
-    const setStatesToDefault = () =>{
-        setName(user.name);
-        setMail(user.mail);
-        setPasswordsToDefault();
+    const validatorsStrategy = {
+        name: (value) => (
+            value.length < usernameMinLength || value.length > usernameMaxLength
+            ? `Name must be ${usernameMinLength}-${usernameMaxLength} characters`
+            : null
+        ),
+        mail: (value) => (!value.includes('@') ? 'Please enter a valid email address' : null),
+        password: (value) => (
+            form.newPassword && value.length < passwordMinLength 
+            ? 'Enter current password to confirm password change' 
+            : null),
+        newPassword: (value) => (
+           value && value.length < passwordMinLength 
+           ? `New password must be at least ${passwordMinLength} chars`
+           : null
+        )
     };
 
     const handleConfirm = () =>{
-        const newErrors = {};
-
-        if (name.length < usernameMinLength) {
-            newErrors.name = `Name must be at least ${usernameMinLength} characters`;
-        }
-
-        if (!mail.includes('@')) {
-            newErrors.mail = 'Please enter a valid email address';
-        }
-
-        if (newPassword && newPassword.length < passwordMinLength) {
-            newErrors.newPassword = `Password must be at least ${passwordMinLength} chars`;
-        }
-
-        if (newPassword && password.length < passwordMinLength) {
-            newErrors.password = 'Enter current password to confirm password change';
-        }
+        const newErrors = Object.entries(form).reduce((acc, [field, value]) => {
+            const error = validatorsStrategy[field](value);
+            if (error) acc[field] = error;
+            return acc;
+        }, {});
 
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
@@ -62,41 +47,42 @@ export default function UserEditForm ({ setIsEditing }){
         }
 
         console.log('sending put request!');
-        setUser(prev =>({...prev, name, mail}));
-        setPasswordsToDefault();
+        setUser(prev =>({...prev, name: form.name, mail: form.mail}));
         setErrors({});
         setIsEditing(false);
     };
     
     const handleCancel = () =>{
-        setStatesToDefault();
         setIsEditing(false);
     };
     
     const handleChange = (e) =>{
-        const strategy = e.target.name;
-        changeStrategy[strategy](e.target.value);
+        const field = e.target.name;
+        setForm(prev => ({
+            ...prev,
+            [field]: e.target.value
+        }));
     };
 
     return(
         <div className="user-editing">
             <ul>
                 <li>
-                    Name: <input name="name" type="text" value={name} onChange={handleChange}></input>
+                    Name: <input name="name" type="text" value={form.name} onChange={handleChange}></input>
                 </li>
                 {errors.name && <span className="error">{errors.name}</span>}
                 <li>
-                    Mail: <input name="mail" type="mail" value={mail} onChange={handleChange}></input>
+                    Mail: <input name="mail" type="mail" value={form.mail} onChange={handleChange}></input>
                 </li>
                 {errors.mail && <span className="error">{errors.mail}</span>}
                 <li>
-                    New Password: <input name="new-password" type="password" value={newPassword} onChange={handleChange} placeholder="Leave it empty, if you don`t want to change password"></input>
+                    New Password: <input name="newPassword" type="password" value={form.newPassword} onChange={handleChange} placeholder="Leave it empty, if you don`t want to change password"></input>
                 </li>
                 {errors.newPassword && <span className="error">{errors.newPassword}</span>}
-                {newPassword && (
+                {form.newPassword && (
                 <>
                     <li>
-                    Confirm Old Password: <input name="password" type="password" value={password} onChange={handleChange} />
+                    Confirm Old Password: <input name="password" type="password" value={form.password} onChange={handleChange} />
                     </li>
                     {errors.password && <span className="error">{errors.password}</span>}
                 </>
