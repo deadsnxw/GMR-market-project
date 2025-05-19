@@ -42,17 +42,21 @@ export default function CreateEditProduct ({isEditing = false}){
     }, [isEditing]);
 
     const validatorsStrategy = {
-        images: (value) => value.length <= 0 ? 'Must be at least 1 photo' : null,
-        name: (value) => (
+        images: (value) => 
+            value.length <= 0 || value.length > imagesMaxAmount 
+        ? `Must be 1-${imagesMaxAmount} photo` 
+        : null,
+
+        name: (value) =>
             value.length < productNameMinLength || value.length > productNameMaxLength
             ? `Name must be ${productNameMinLength}-${productNameMaxLength} characters`
-            : null
-        ),
-        description: (value) => (
+            : null,
+
+        description: (value) => 
             value.length < descriptionMinLength
             ? `Description must be at least ${descriptionMinLength} characters`
-            : null
-        ),
+            : null,
+            
         amount: (value) => {
             const num = Number(value);
             return isNaN(num) || !Number.isInteger(num) || num <= 0 

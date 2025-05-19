@@ -12,7 +12,7 @@ export default function HeaderComponent() {
                 <img src="/logo192.png" alt="Logo"/>
             </div>
             <nav className="nav">
-                {user && balance !== null && <span onClick={() => window.location.href = '/balance'}>${balance}</span>}
+                {!user.isShop && user && balance !== null && <span onClick={() => window.location.href = '/balance'}>${balance}</span>}
                 <img src={"/userpic.png"}
                      alt="User"
                      className="user-pic"
