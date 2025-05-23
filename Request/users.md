@@ -13,3 +13,10 @@ CREATE TABLE users (
   )
 );
 ```
+```
+ALTER TABLE users
+ADD COLUMN purchase_story TEXT DEFAULT NULL,
+ADD CONSTRAINT purchase_story_check CHECK (
+  is_shop = FALSE OR purchase_story IS NULL
+);
+```
