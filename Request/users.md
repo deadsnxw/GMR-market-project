@@ -1,4 +1,5 @@
- CREATE TABLE users (
+```
+CREATE TABLE users (
   id INT AUTO_INCREMENT PRIMARY KEY,
   username VARCHAR(100) NOT NULL,
   password_hash TEXT NOT NULL,
@@ -11,3 +12,4 @@
     (is_shop = FALSE AND balance IS NOT NULL)
   )
 );
+```
