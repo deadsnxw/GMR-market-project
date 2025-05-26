@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import ImageComponent from "./ImageComponent";
 import TagComponent from "./TagComponent";
+import Validator from "../../validator/Validator";
 import "../../styles/CreateEditProduct.css";
 
 const productTags = ["electronics", "clothing", "home", "kitchen", "furniture", "smartphone", "laptop", "headphones", "wearable", "gadget", "men", "women", "kids", "summer", "winter", "appliances", "decor", "cookware", "utensils", "storage", "sports", "outdoor", "fitness", "beauty", "skincare", "organic", "sustainable", "luxury", "budget", "premium", "new", "sale", "bestseller", "limited"];
@@ -14,10 +15,19 @@ export default function CreateEditProduct({ isEditing = false }) {
     description: "",
     amount: "",
     price: "",
-    tags: "",
+    tags: [],
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(isEditing);
+
+  const validator = new Validator()
+  .addStrategy('images', Validator.required("Add at least one image"))
+  .addStrategy('name', Validator.minLength(4, "Name must be at least 4 characters"))
+  .addStrategy('name', Validator.maxLength(30, "Name must be no more than 30 characters"))
+  .addStrategy('description', Validator.minLength(15, "Description must be at least 15 characters"))
+  .addStrategy('amount', value => !Number.isInteger(Number(value)) || value <= 0 ? "Enter valid amount" : null)
+  .addStrategy('price', value => isNaN(value) || value <= 0 || /\.\d{3,}$/.test(value) ? "Enter valid price" : null)
+  .addStrategy('tags', Validator.required("Select at least one tag"));
 
   useEffect(() => {
     if (isEditing) {
@@ -29,18 +39,6 @@ export default function CreateEditProduct({ isEditing = false }) {
         });
     }
   }, [isEditing]);
-
-  const validateField = (name, value) => {
-    const validations = {
-      images: () => (value.length === 0 ? "Add at least one image" : null),
-      name: () => value.length < 4 || value.length > 30 ? "Name must be 4-30 characters" : null,
-      description: () => value.length < 15 ? "Description must be at least 15 characters" : null,
-      amount: () => !Number.isInteger(Number(value)) || value <= 0 ? "Enter valid amount" : null,
-      price: () => (isNaN(value) || value <= 0 || /\.\d{3,}$/.test(value) ? "Enter valid price" : null),
-      tags: () => (value.length === 0 ? "Select at least one tag" : null),
-    };
-    return validations[name] ? validations[name]() : null;
-  };
 
   const handleImageUpload = (files) => {
     const imageFiles = Array.from(files).filter((file) =>
@@ -73,15 +71,10 @@ export default function CreateEditProduct({ isEditing = false }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const newErrors = {};
+    const { isValid, errors } = validator.validateForm(form);
 
-    Object.entries(form).forEach(([name, value]) => {
-      const error = validateField(name, value);
-      if (error) newErrors[name] = error;
-    });
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
+    if (!isValid) {
+      setErrors(errors);
       return;
     }
 
