@@ -23,11 +23,18 @@ export default function UserProfile(){
     }
 
     useEffect(() => {
-        //TODO: If user is a shop, you should fetch it products, not purchased
-        fetch("/shortProducts/shortProducts.json")
-        .then((response) => response.json())
+        fetch(`/api/user/${user.id}`)
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error('Server error');
+            }
+            return response.json()})
         .then((data) => {
-            setPurchased(data)
+            setPurchased(data);
+            setLoading(false);
+        })
+        .catch(error => {
+            console.error('Error:', error);
             setLoading(false);
         });
     }, []);
@@ -54,15 +61,18 @@ export default function UserProfile(){
                 }
             </div>
             <h1>{user.isShop ? 'Your' : 'Purchased'} Products</h1>
-            <div className="products-container">
-                <button onClick={()=>handleCardChange('prev')}>&lt;</button>
-                <div className="products">
-                    {getCurrentCards().map(product => (
-                        <ProductCard key={product.id} product={product} />
-                    ))}
-                </div>
-                <button onClick={()=>handleCardChange('next')}>&gt;</button>
-            </div>
+            {purchased.length !== 0 ? (
+                <div className="products-container">
+                    <button onClick={()=>handleCardChange('prev')}>&lt;</button>
+                    <div className="products">
+                        {getCurrentCards().map(product => (
+                            <ProductCard key={product.id} product={product} />
+                        ))}
+                    </div>
+                    <button onClick={()=>handleCardChange('next')}>&gt;</button>
+                </div> ) : (
+                <div>You Have No Products!</div>
+            )}
             {user.isShop && <button onClick={()=> navigate('/me/create')}>Add New Product</button>}
         </div>
     );

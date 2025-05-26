@@ -13,7 +13,7 @@ export default function ProductInfo(){
     const [loading, setLoading] = useState(true);
     const [currentPhoto, setCurrentPhoto] = useState(0);
 
-    const shouldShowBuyButton = !user || (user && !user.isShop);
+    const shouldShowBuyButton = user && !user.isShop;
 
     const purchaseStrategys = {
         'user': (product) =>{console.log(user.balance >= product.price ? 'Purchased' : 'Not Enough Money');},
@@ -21,10 +21,18 @@ export default function ProductInfo(){
     }
 
     useEffect(()=>{
-        fetch("/product.json")
-        .then((response) => response.json())
+        fetch(`/api/product/${productId}`)
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error('Server error');
+            }
+            return response.json()})
         .then((data) => {
             setProduct(data);
+            setLoading(false);
+        })
+        .catch(error => {
+            console.error('Error:', error);
             setLoading(false);
         });
     }, []);
