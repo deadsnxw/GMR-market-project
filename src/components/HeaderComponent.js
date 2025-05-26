@@ -14,7 +14,7 @@ export default function HeaderComponent() {
                 <img src="/logo192.png" alt="Logo"/>
             </div>
             <nav className="nav">
-                {!user.isShop && user && balance !== null && <span onClick={() => navigate('/balance')}>${balance}</span>}
+                { user && !user.isShop && balance !== null && <span onClick={() => navigate('/balance')}>${balance}</span>}
                 {user && <button onClick={() => setUser(null)}>Logout</button>}
                 <img src={"/userpic.png"}
                      alt="User"
