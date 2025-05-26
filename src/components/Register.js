@@ -28,15 +28,34 @@ export default function Register() {
         const validationErrors = validateInputs();
         if (Object.keys(validationErrors).length > 0) {
             setErrors(validationErrors);
-        } else {
-            setErrors({});
-            if (!isChecked) {
-                console.log("User registered.");
-            } else {
-                console.log("Seller registered.");
-            }
+            return;
         }
-    };
+
+        setErrors({});
+        fetch("/api/register", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                username,
+                email,
+                password,
+                isShop: isChecked
+            }),
+        })
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error("Network response was not ok");
+                }
+                navigate("/Login");
+            })
+            .catch ((error) => {
+                console.error("Error during registration:", error);
+                setErrors({general: "Registration failed. Please try again."});
+            })
+    }
+
 
     return (
         <div className="register">
@@ -77,7 +96,7 @@ export default function Register() {
                     />
                     <label htmlFor="terms">I'm a seller</label>
                 </div>
-
+                {errors.general && <p className="error">{errors.general}</p>}
                 <span onClick={() => navigate("/Login")}>Already have an account ?</span>
             </form>
         </div>
