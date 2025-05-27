@@ -1,70 +1,92 @@
-const productsController = require('../controllers/productsController');
-const usersController = require('../controllers/usersController');
+const Command = require('../command/Command');
 
-const staticRoutes = {
-  '/api/login': usersController.login,
-  '/api/registration': usersController.registration,
-  '/api/balance': usersController.balance,
-  '/api/main': productsController.getAllProducts,
-  '/api/new': productsController.create,
-};
+const productController = require('../controllers/productController');
+const presentController = require('../controllers/presentController');
+const interactController = require('../controllers/interactController');
+const balanceController = require('../controllers/balanceController');
+const authController = require('../controllers/authController');
+const profileController = require('../controllers/profileController');
+const middlewareG = require('../middleware/globalMW')
 
-const staticRoutesMethods = {
-  '/api/login': ['POST'],
-  '/api/registration': ['POST'],
-  '/api/balance': ['PATCH'],
-  '/api/main': ['GET'],
-  '/api/new': ['POST'],
-};
+function routeWithMW(handler, localMW = [], localAW = []) {
+  const globalMW = [middlewareG.loggingMW];
+  const globalAW = [middlewareG.loggingAW];
+
+  return new Command(handler, [...globalMW, ...localMW], [...globalAW, ...localAW]);
+}
+
+const staticRoutes = [
+  {
+    method: 'POST',
+    regexp: /^\/api\/login$/,
+    command: routeWithMW(authController.login)
+  },
+  {
+    method: 'POST',
+    regexp: /^\/api\/registration$/,
+    command: routeWithMW(authController.registration)
+  },
+  {
+    method: 'PATCH',
+    regexp: /^\/api\/balance$/,
+    command: routeWithMW(balanceController.balance)
+  },
+  {
+    method: 'GET',
+    regexp: /^\/api\/main$/,
+    command: routeWithMW(presentController.getAllProducts)
+  },
+  {
+    method: 'POST',
+    regexp: /^\/api\/create$/,
+    command: routeWithMW(productController.create)
+  }
+];
 
 const dynamicRoutes = [
   {
     method: 'GET',
-    regex: /^\/api\/user\/([^/]+)$/,
-    handler: (req, res, params) => usersController.getProfile(req, res, params[0])
+    regexp: /^\/api\/user\/([^/]+)$/,
+    command: routeWithMW(profileController.getProfile)
   },
   {
     method: 'PATCH',
-    regex: /^\/api\/user\/([^/]+)$/,
-    handler: (req, res, params) => usersController.patch(req, res, params[0])
+    regexp: /^\/api\/user\/([^/]+)$/,
+    command: routeWithMW(profileController.patch)
   },
   {
     method: 'GET',
-    regex: /^\/api\/product\/([^/]+)$/,
-    handler: (req, res, params) => productsController.getProductById(req, res, params[0])
+    regexp: /^\/api\/product\/([^/]+)$/,
+    command: routeWithMW(presentController.getProductById)
   },
   {
     method: 'POST',
-    regex: /^\/api\/product\/([^/]+)$/,
-    handler: (req, res, params) => productsController.buy_check(req, res, params[0])
+    regexp: /^\/api\/product\/([^/]+)$/,
+    command: routeWithMW(interactController.buy_check)
   },
   {
     method: 'DELETE',
-    regex: /^\/api\/product\/([^/]+)$/,
-    handler: (req, res, params) => productsController.remove(req, res, params[0])
+    regexp: /^\/api\/product\/([^/]+)$/,
+    command: routeWithMW(productController.remove)
   },
   {
     method: 'PATCH',
-    regex: /^\/api\/product\/([^/]+)$/,
-    handler: (req, res, params) => productsController.patch(req, res, params[0])
+    regexp: /^\/api\/product\/([^/]+)$/,
+    command: routeWithMW(productController.patch)
   }
 ];
+
+const allRoutes = [...staticRoutes, ...dynamicRoutes];
 
 function apiRouter(req, res) {
   const method = req.method;
   const url = req.url;
-
-  if (staticRoutes[url]) {
-    if (staticRoutesMethods[url].includes(method)) {
-      return staticRoutes[url](req, res);
-    }
-  }
-
-  for (const route of dynamicRoutes) {
-    if (route.method === method) {
-      const match = url.match(route.regex);
+    
+  for (const { method: routeMethod, regexp, command } of allRoutes) {
+    if (routeMethod === method) {
+      const match = url.match(regexp);
       if (match) {
-        return route.handler(req, res, match.slice(1));
+        return command.execute(req, res, match.slice(1));
       }
     }
   }
