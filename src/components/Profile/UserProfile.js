@@ -10,7 +10,7 @@ export default function UserProfile(){
     const navigate = useNavigate();
     const {user} = useContext(UserContext);
 
-    const [purchased, setPurchased] = useState([]);
+    const [products, setProducts] = useState([]);
     const [isEditing, setIsEditing] = useState(false);
     const [loading, setLoading] = useState(true);
     const [currentFirstCard, setCurrentFirstCard] = useState(0);
@@ -19,23 +19,37 @@ export default function UserProfile(){
 
     const cardChangeStrategy ={
         'prev': ()=>{setCurrentFirstCard(prev=>(prev > 0 ? --prev : prev))},
-        'next': ()=>{setCurrentFirstCard(prev=>(prev + productsPerPage < purchased.length ? ++prev : prev))}
+        'next': ()=>{setCurrentFirstCard(prev=>(prev + productsPerPage < products.length ? ++prev : prev))}
     }
 
     useEffect(() => {
-        //TODO: If user is a shop, you should fetch it products, not purchased
         fetch("/shortProducts/shortProducts.json")
         .then((response) => response.json())
         .then((data) => {
-            setPurchased(data)
+            setProducts(data);
             setLoading(false);
         });
+
+        // fetch(`/api/user/${user.id}`)
+        //   .then((response) => {
+        //       if (!response.ok) {
+        //           throw new Error('Server error');
+        //       }
+        //       return response.json()})
+        //   .then((data) => {
+        //       setProducts(data);
+        //       setLoading(false);
+        //   })
+        //   .catch(error => {
+        //       console.error('Error:', error);
+        //       setLoading(false);
+        //   });
     }, []);
 
     const getCurrentCards = useCallback(() => {
         const startIndex = currentFirstCard;
-        return purchased.slice(startIndex, startIndex + productsPerPage);
-    }, [currentFirstCard, purchased]);
+        return products.slice(startIndex, startIndex + productsPerPage);
+    }, [currentFirstCard, products]);
 
     const handleCardChange = (strategy) => {
         cardChangeStrategy[strategy]();

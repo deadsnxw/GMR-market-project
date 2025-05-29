@@ -1,6 +1,7 @@
 import React, {useState, useContext} from "react";
 import UserContext from "../../context/UserContext";
-import "../../styles/UserEditForm.css"
+import "../../styles/UserEditForm.css";
+import Validator from "../../validator/Validator";
 
 export default function UserEditForm ({ setIsEditing }){
     const {user, setUser} = useContext(UserContext);
@@ -12,43 +13,42 @@ export default function UserEditForm ({ setIsEditing }){
         newPassword: ''
     });
     const [errors, setErrors] = useState({});
-    const usernameMinLength = 1;
-    const usernameMaxLength = 16;
-    const passwordMinLength = 6;
 
-    const validatorsStrategy = {
-        name: (value) => (
-            value.length < usernameMinLength || value.length > usernameMaxLength
-            ? `Name must be ${usernameMinLength}-${usernameMaxLength} characters`
-            : null
-        ),
-        mail: (value) => (!value.includes('@') ? 'Please enter a valid email address' : null),
-        password: (value) => (
-            form.newPassword && value.length < passwordMinLength 
-            ? 'Enter current password to confirm password change' 
-            : null),
-        newPassword: (value) => (
-           value && value.length < passwordMinLength 
-           ? `New password must be at least ${passwordMinLength} chars`
-           : null
-        )
-    };
+    const validator = new Validator()
+    .addStrategy('name', Validator.minLength(1, 'Username must be at least 1 character'))
+    .addStrategy('name', Validator.maxLength(16, 'Username must ba less than 16 character'))
+    .addStrategy('mail', Validator.email('Enter valid mail'))
+    .addStrategy('newPassword', value => value && value.length < 6 ? `New password must be at least 6 characters` : null)
+    .addStrategy('password', value => form.newPassword && value.length < 6 ? 'Enter current password to confirm password change' : null)
 
     const handleConfirm = () =>{
-        const newErrors = Object.entries(form).reduce((acc, [field, value]) => {
-            const error = validatorsStrategy[field](value);
-            if (error) acc[field] = error;
-            return acc;
-        }, {});
-
-        if (Object.keys(newErrors).length > 0) {
-            setErrors(newErrors);
+        const { isValid, errors } = validator.validateForm(form);
+  
+        if (!isValid) {
+            setErrors(errors);
             return;
         }
 
-        console.log('sending put request!');
-        setUser(prev =>({...prev, name: form.name, mail: form.mail}));
         setErrors({});
+        // fetch(`/api/user/${user.id}`, {
+        //     method: 'PATCH',
+        //     headers: {
+        //         'Content-Type': 'application/json',
+        //     },
+        //     body: JSON.stringify(form)
+        // })
+        // .then((response) => {
+        //     if (!response.ok) {
+        //         throw new Error('Server error');
+        //     }
+        //     setUser(prev => ({...prev, name: form.name, mail: form.mail}));
+        //     setIsEditing(false);
+        // })
+        // .catch(error => {
+        //     console.error('Error:', error);
+        // });
+        console.log('sending patch request!');
+        setUser(prev => ({...prev, name: form.name, mail: form.mail}));
         setIsEditing(false);
     };
     
