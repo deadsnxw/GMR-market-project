@@ -37,6 +37,21 @@ export default function CreateEditProduct({ isEditing = false }) {
           setForm(data);
           setLoading(false);
         });
+      
+      // fetch(`/api/product/${productId}`)
+      //   .then((response) => {
+      //       if (!response.ok) {
+      //           throw new Error('Server error');
+      //       }
+      //       return response.json()})
+      //   .then((data) => {
+      //       setForm(data);
+      //       setLoading(false);
+      //   })
+      //   .catch(error => {
+      //       console.error('Error:', error);
+      //       setLoading(false);
+      //   });
     }
   }, [isEditing]);
 
@@ -69,6 +84,21 @@ export default function CreateEditProduct({ isEditing = false }) {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const handleDelete = () => {
+    // fetch(`/api/product/${productId}`, {
+    //     method: 'DELETE',
+    // })
+    // .then((response) => {
+    //     if (!response.ok) {
+    //         throw new Error('Server error');
+    //     }
+    //     navigate(`/me`);
+    // })
+    // .catch(error => {
+    //     console.error('Error:', error);
+    // });
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     const { isValid, errors } = validator.validateForm(form);
@@ -79,6 +109,41 @@ export default function CreateEditProduct({ isEditing = false }) {
     }
 
     setErrors({});
+    if(isEditing){
+      // fetch(`/api/product/${productId}`, {
+      //     method: 'PATCH',
+      //     headers: {
+      //         'Content-Type': 'application/json',
+      //     },
+      //     body: JSON.stringify(form)
+      // })
+      // .then((response) => {
+      //     if (!response.ok) {
+      //         throw new Error('Server error');
+      //     }
+      //     navigate(`/product/${productId}`)
+      // })
+      // .catch(error => {
+      //     console.error('Error:', error);
+      // });
+    } else {
+      // fetch(`/api/create `, {
+      //     method: 'POST',
+      //     headers: {
+      //         'Content-Type': 'application/json',
+      //     },
+      //     body: JSON.stringify(form)
+      // })
+      // .then((response) => {
+      //     if (!response.ok) {
+      //         throw new Error('Server error');
+      //     }
+      //     navigate(`/me`)
+      // })
+      // .catch(error => {
+      //     console.error('Error:', error);
+      // });
+    }
     console.log(isEditing ? "Updating product" : "Creating product");
   };
 
@@ -188,7 +253,7 @@ export default function CreateEditProduct({ isEditing = false }) {
           <button
             type="button"
             className="btn-delete"
-            onClick={() => console.log("Delete")}
+            onClick={handleDelete}
           >
             Delete
           </button>

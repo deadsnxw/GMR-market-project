@@ -32,9 +32,27 @@ export function PrivateGuestRoot ({component}){
 export function PrivateShopCreatedRoot ({component}){
     const { productId } = useParams();
     const {user} = useContext(UserContext);
-    const [isOwner, setIsOwner] = useState(true); 
-    //Sendind Get request on /users/user.id/products, after this comparising productId with productIds, we got
+    const [isOwner, setIsOwner] = useState(false); 
 
+    // fetch(`/api/check/{user.id} `, {
+    //     method: 'POST',
+    //     headers: {
+    //         'Content-Type': 'application/json',
+    //     },
+    //     body: JSON.stringify({productId})
+    // })
+    // .then((response) => {
+    //     if (!response.ok) {
+    //         throw new Error('Server error');
+    //     }
+    //     return response.json()
+    // })
+    // .then((data) => {
+    //     setIsOwner(data.isOwner)
+    //  })
+    // .catch(error => {
+    //     console.error('Error:', error);
+    // });
 
     return user && user.isShop && isOwner ? component : <div>203 not found</div>;
 }

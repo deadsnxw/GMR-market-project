@@ -29,9 +29,26 @@ export default function UserEditForm ({ setIsEditing }){
             return;
         }
 
-        console.log('sending put request!');
-        setUser(prev => ({...prev, name: form.name, mail: form.mail}));
         setErrors({});
+        // fetch(`/api/user/${user.id}`, {
+        //     method: 'PATCH',
+        //     headers: {
+        //         'Content-Type': 'application/json',
+        //     },
+        //     body: JSON.stringify(form)
+        // })
+        // .then((response) => {
+        //     if (!response.ok) {
+        //         throw new Error('Server error');
+        //     }
+        //     setUser(prev => ({...prev, name: form.name, mail: form.mail}));
+        //     setIsEditing(false);
+        // })
+        // .catch(error => {
+        //     console.error('Error:', error);
+        // });
+        console.log('sending patch request!');
+        setUser(prev => ({...prev, name: form.name, mail: form.mail}));
         setIsEditing(false);
     };
     
