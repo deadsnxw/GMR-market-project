@@ -1,3 +1,9 @@
+.main-page {
+    display: flex;
+    height: calc(100vh - 70px);
+    overflow: hidden;
+}
+
 .left-panel {
     width: 15%;
     height: calc(100vh - 70px);
@@ -10,15 +16,18 @@
 }
 
 .main-panel {
-    margin-left: 15%;
-    width: 85%;
-    top: 70px;
-    height: calc(100vh - 70px);
     background-color: #2f2f2f;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
     overflow-y: auto;
+    box-sizing: border-box;
+    padding-left: 280px;
+    padding-top: 20px;
+    min-width: 0;
 }
 
-h2 {
+.left-panel h2 {
     color: #f0f0f0;
     font-size: 24px;
     margin-bottom: 20px;
@@ -42,4 +51,9 @@ h2 {
 .left-panel-content ul li:hover {
     background-color: #f0f0f0;
     cursor: pointer;
+}
+
+.product-card {
+    flex: 0 0 calc(25% - 20px);
+    box-sizing: border-box;
 }
