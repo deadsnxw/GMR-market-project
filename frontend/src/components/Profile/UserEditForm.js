@@ -1,55 +1,64 @@
 import React, {useState, useContext} from "react";
 import UserContext from "../../context/UserContext";
-import "../../styles/UserEditForm.css"
+import "../../styles/UserEditForm.css";
+import Validator from "../../validator/Validator";
 
 export default function UserEditForm ({ setIsEditing }){
     const {user, setUser} = useContext(UserContext);
 
     const [form, setForm] = useState({
-        name: user.name,
-        mail: user.mail,
+        username: user.name,
+        email: user.mail,
         password: '',
         newPassword: ''
     });
     const [errors, setErrors] = useState({});
-    const usernameMinLength = 1;
-    const usernameMaxLength = 16;
-    const passwordMinLength = 6;
 
-    const validatorsStrategy = {
-        name: (value) => (
-            value.length < usernameMinLength || value.length > usernameMaxLength
-            ? `Name must be ${usernameMinLength}-${usernameMaxLength} characters`
-            : null
-        ),
-        mail: (value) => (!value.includes('@') ? 'Please enter a valid email address' : null),
-        password: (value) => (
-            form.newPassword && value.length < passwordMinLength 
-            ? 'Enter current password to confirm password change' 
-            : null),
-        newPassword: (value) => (
-           value && value.length < passwordMinLength 
-           ? `New password must be at least ${passwordMinLength} chars`
-           : null
-        )
-    };
+    const validator = new Validator()
+    .addStrategy('username', Validator.minLength(1, 'Username must be at least 1 character'))
+    .addStrategy('username', Validator.maxLength(16, 'Username must ba less than 16 character'))
+    .addStrategy('email', Validator.email('Enter valid mail'))
+    .addStrategy('newPassword', value => value && value.length < 6 ? `New password must be at least 6 characters` : null)
+    .addStrategy('password', value => form.newPassword && value.length < 6 ? 'Enter current password to confirm password change' : null)
 
     const handleConfirm = () =>{
-        const newErrors = Object.entries(form).reduce((acc, [field, value]) => {
-            const error = validatorsStrategy[field](value);
-            if (error) acc[field] = error;
-            return acc;
-        }, {});
-
-        if (Object.keys(newErrors).length > 0) {
-            setErrors(newErrors);
+        let packageForm = form;
+        const { isValid, errors } = validator.validateForm(form);
+  
+        if (!isValid) {
+            setErrors(errors);
             return;
         }
 
-        console.log('sending put request!');
-        setUser(prev =>({...prev, name: form.name, mail: form.mail}));
         setErrors({});
-        setIsEditing(false);
+        
+        if(!form.newPassword) {
+            packageForm = {
+                username: form.username,
+                email: form.email
+            };
+        }
+
+        fetch(`/api/user/${user.id}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(packageForm)
+        })
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error('Server error');
+            }
+            setUser(prev => ({...prev, name: form.username, mail: form.email}));
+            setIsEditing(false);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+        console.log('sending patch request!');
+        // setUser(prev => ({...prev, name: form.name, mail: form.mail}));
+        // setIsEditing(false);
     };
     
     const handleCancel = () =>{
@@ -68,11 +77,11 @@ export default function UserEditForm ({ setIsEditing }){
         <div className="user-editing">
             <ul>
                 <li>
-                    Name: <input name="name" type="text" value={form.name} onChange={handleChange}></input>
+                    Name: <input name="username" type="text" value={form.username} onChange={handleChange}></input>
                 </li>
                 {errors.name && <span className="error">{errors.name}</span>}
                 <li>
-                    Mail: <input name="mail" type="mail" value={form.mail} onChange={handleChange}></input>
+                    Mail: <input name="email" type="mail" value={form.email} onChange={handleChange}></input>
                 </li>
                 {errors.mail && <span className="error">{errors.mail}</span>}
                 <li>

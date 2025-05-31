@@ -1,66 +1,83 @@
 const db = require('../config/database');
+const tagList = require('../config/tags');
 
-function getAllProducts(req, res) {
-  const sql = `
-    SELECT 
-      p.id AS product_id,
-      p.name,
-      p.price,
-      p.amount,
-      p.description,
-      p.tags,
-      p.user_id,
-      i.id AS image_id,
-      i.img AS image_url
-    FROM products p
-    LEFT JOIN images i ON p.id = i.product_id
-  `;
-
-  db.query(sql, (err, results) => {
-    if (err) {
-      res.statusCode = 500;
-      return res.end('Помилка запиту до БД');
-    }
-
-    const productsMap = {};
-
-    results.forEach(row => {
-      if (!productsMap[row.product_id]) {
-        productsMap[row.product_id] = {
-          id: row.product_id,
-          name: row.name,
-          price: row.price,
-          amount: row.amount,
-          description: row.description,
-          tags: row.tags ? row.tags.split(':') : [],
-          user_id: row.user_id,
-          images: []
-        };
-      }
-
-      if (row.image_id) {
-        productsMap[row.product_id].images.push({
-          id: row.image_id,
-          url: row.image_url
-        });
-      }
+function getRequestBody(req) {
+  return new Promise((resolve, reject) => {
+    let data = '';
+    req.on('data', chunk => {
+      data += chunk;
     });
-
-    const products = Object.values(productsMap);
-
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(products));
+    req.on('end', () => resolve(data));
+    req.on('error', err => reject(err));
   });
 }
 
-function getProductById(req, res, id) {
-  const productId = parseInt(id);
+async function getProductsByTags(req, res) {
+  try {
+    const body = await getRequestBody(req);
+    const { tags: requestedTags } = JSON.parse(body);
+    
+    const sql = `
+      SELECT 
+        p.id AS product_id,
+        p.name,
+        p.price,
+        p.amount,
+        p.tags,
+        i.id AS image_id,
+        i.img AS image_url
+      FROM products p
+      LEFT JOIN images i ON p.id = i.product_id
+    `;
 
-  if (isNaN(productId)) {
-    res.statusCode = 400;
-    return res.end('Некоректний ID товару');
+    const [results] = await db.query(sql);
+
+    const productsMap = {};
+
+    for (const result of results) {
+      if (!productsMap[result.product_id]) {
+        productsMap[result.product_id] = {
+          id: result.product_id,
+          name: result.name,
+          price: parseFloat(result.price),
+          amount: result.amount,
+          tags: result.tags ? result.tags.split(':') : [],
+          image: null
+        };
+      }
+
+      if (result.image_id && !productsMap[result.product_id].image) {
+        productsMap[result.product_id].image = result.image_url;
+      }
+    }
+
+    let products = Object.values(productsMap);
+
+    
+
+    if (requestedTags.length > 0) {
+      products = products.filter(product =>
+        requestedTags.every(tag => product.tags.includes(tag))
+      );
+    }
+
+    const response = products
+      .slice(0, 16)
+      .map(({ tags, ...p }) => p);
+
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify({ products: response, tagList: tagList }));
+
+  } catch (error) {
+    console.error(error);
+    res.statusCode = 500;
+    res.end('Internal Server Error');
   }
+}
+
+async function getProductById(req, res, id) {
+  const productId = parseInt(id);
 
   const sql = `
     SELECT 
@@ -78,41 +95,43 @@ function getProductById(req, res, id) {
     WHERE p.id = ?
   `;
 
-  db.query(sql, [productId], (err, results) => {
-    if (err) {
-      res.statusCode = 500;
-      return res.end('Помилка запиту до БД');
-    }
+  try {
+    const [results] = await db.query(sql, [productId]);
 
     if (results.length === 0) {
       res.statusCode = 404;
-      return res.end('Товар не знайдено');
+      return res.end('Product Not Found');
     }
 
-    const product = {
+    const response = {
       id: results[0].product_id,
       name: results[0].name,
       price: parseFloat(results[0].price),
       amount: results[0].amount,
       description: results[0].description,
-      tags: results[0].tags.split(':'),
-      user_id: results[0].user_id,
+      tags: results[0].tags ? results[0].tags.split(':') : [],
+      creatorId: results[0].user_id,
       images: []
     };
 
-    results.forEach(row => {
+    for (const row of results) {
       if (row.image_id) {
-          product.images.push(row.image_url);
+        response.images.push(row.image_url);
       }
-    });
+    }
 
     res.statusCode = 200;
     res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(product));
-  });
+    res.end(JSON.stringify(response));
+
+  } catch (error) {
+    console.error(error);
+    res.statusCode = 500;
+    res.end('Internal Server Error');
+  }
 }
 
 module.exports = {
-  getAllProducts,
-  getProductById
+  getProductById,
+  getProductsByTags
 };

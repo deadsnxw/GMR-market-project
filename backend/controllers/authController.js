@@ -1,58 +1,73 @@
 const db = require('../config/database');
 
-function login(req, res) {
-  let body = '';
-
-  req.on('data', chunk => {
-    body += chunk;
-  });
-
-  req.on('end', () => {
-    const { email, password } = JSON.parse(body);
-
-    db.query('SELECT * FROM users WHERE email = ?', [email], (err, results) => {
-      if (err) {
-        res.statusCode = 500;
-        return res.end('DB error');
-      }
-
-      if (results.length === 0) {
-        res.statusCode = 401;
-        return res.end('No such email in database');
-      }
-
-      const user = results[0];
-
-      if (password !== user.password_hash) {
-        res.statusCode = 401;
-        return res.end('Incorrect password');
-      }
-
-      res.statusCode = 200;
-      res.setHeader('Content-Type', 'application/json');
-      res.end(JSON.stringify({ id: user.id, name: user.username, mail: user.email, balance: user.balance, is_shop: user.is_shop }));
+function getRequestBody(req) {
+  return new Promise((resolve, reject) => {
+    let data = '';
+    req.on('data', chunk => {
+      data += chunk;
     });
+    req.on('end', () => resolve(data));
+    req.on('error', err => reject(err));
   });
 }
 
-function registration(req, res) {
-  const sql = 'INSERT INTO users (username, password, email, is_shop, balance, purchase_story) VALUES (?,?,?,?,?,?)';
-  const username = req.body.username;
-  const password = req.body.password;
-  const email = req.body.email;
-  const is_shop = req.body.is_shop;
-  const balance = is_shop ? null : 0.0;
-  const purchase_story = null;
+async function login(req, res) {
+  try {
+    const body = await getRequestBody(req);
+    const { email, password } = JSON.parse(body);
 
-  db.query(sql, [username, password, email, is_shop, balance, purchase_story], (err, results) => {
-    if (err) {
-      res.statusCode = 500;
-      return res.end('Database error');
+    const sql = 'SELECT * FROM users WHERE email = ?';
+
+    const [results] = await db.query(sql, [email]);
+    
+    if (results.length === 0) {
+      res.statusCode = 401;
+      return res.end('No Such Email');
     }
-  
+
+    const user = results[0];
+    
+    if (password !== user.password_hash) {
+      res.statusCode = 401;
+      return res.end('Incorrect Password');
+    }
+
     res.statusCode = 200;
-    res.end();
-  });
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify({
+      id: user.id,
+      name: user.username,
+      mail: user.email,
+      balance: user.balance,
+      isShop: user.is_shop
+    }));
+  } catch (err) {
+    console.error(err);
+    res.statusCode = 500;
+    res.end('Internal Server Error');
+  }
+}
+
+async function registration(req, res) {
+  try {
+    const body = await getRequestBody(req);
+    const data = JSON.parse(body);
+    const { username, password, email, isShop } = data;
+
+    const balance = isShop ? null : 0.0;
+    const purchase_story = '';
+    const sql = 'INSERT INTO users (username, password_hash, email, is_shop, balance, purchase_story) VALUES (?,?,?,?,?,?)';
+
+    await db.query(sql, [username, password, email, isShop, balance, purchase_story]);
+
+    res.statusCode = 200;
+    res.end('Registration Succeed');
+
+  } catch (err) {
+    console.error(err);
+    res.statusCode = 500;
+    res.end('Internal Server Error');
+  }
 }
 
 module.exports = {

@@ -1,87 +1,116 @@
 const db = require('../config/database');
 
-function create(req, res) {
-  const sqlProduct = 'INSERT INTO products (name, price, amount, description, tags, user_id) VALUES (?,?,?,?,?,?)';
-  const sqlImages = 'INSERT INTO images (image_url, product_id) VALUES (?,?)';
-  const name = req.body.name;
-  const price = req.body.price;
-  const amount = req.body.amount;
-  const description = req.body.description;
-  const tags = req.body.tags.join(':');
-  const user_id = req.body.user_id;
-  const image_urls = req.body.image_url;
-  let completed = 0;
-
-  db.query(sqlProduct, [name, price, amount, description, tags, user_id], (err, results) => {
-    if (err) {
-      res.statusCode = 500;
-      return res.end('Database error');
-    }
-
-    const productId = results.insertId;
-
-    image_urls.forEach(image_url => {
-      db.query(sqlImages, [image_url, productId], (err, results) => {
-        if (err) {
-          res.statusCode = 500;
-          return res.end('Database error');
-        }
-      
-        completed++;
-
-        if (completed === image_urls.length) {
-          res.statusCode = 200;
-          res.end();
-        }
-      });      
+function getRequestBody(req) {
+  return new Promise((resolve, reject) => {
+    let data = '';
+    req.on('data', chunk => {
+      data += chunk;
     });
+    req.on('end', () => resolve(data));
+    req.on('error', err => reject(err));
   });
 }
 
-function remove(req, res, id) {
+async function create(req, res) {
+  const body = await getRequestBody(req);
+  const { name, price, amount, description, tags, userId: user_id, images: image_urls } = JSON.parse(body);
+
+  const sqlProduct = 'INSERT INTO products (name, price, amount, description, tags, user_id) VALUES (?,?,?,?,?,?)';
+  const sqlImages = 'INSERT INTO images (img, product_id) VALUES (?,?)';
+  
+  try {
+    const [result] = await db.query(sqlProduct, [name, price, amount, description, tags.join(':'), user_id]);
+
+    const productId = result.insertId;
+
+    for (const image_url of image_urls) {
+      await db.query(sqlImages, [image_url, productId]);
+    }
+
+    res.statusCode = 200;
+    res.end('Product Created');
+
+  } catch (err) {
+    console.error(err);
+    res.statusCode = 500;
+    res.end('Internal Server Error');
+  }
+}
+
+async function remove(req, res, id) {
+  const productId = parseInt(id);
+
   const sql = 'DELETE FROM products WHERE id = ?';
 
-  db.query(sql, [id], (err, results) => {
-    if (err) {
-      res.statusCode = 500;
-      return res.end('Database error');
-    }
+  try {
+    const [result] = await db.query(sql, [productId]);
 
-    if (results.length === 0) {
+    if (result.affectedRows === 0) {
       res.statusCode = 404;
-      return res.end('Product not found');
+      return res.end('Nothing Deleted');
     }
 
     res.statusCode = 200;
-    res.end();
-  });
+    res.end('Product Deleted');
+
+  } catch (err) {
+    console.error(err);
+    res.statusCode = 500;
+    res.end('Internal Server Error');
+  }
 }
 
-function patch(req, res, id) {
-  const updates = req.body;
-  const keys = Object.keys(updates);
+async function patch(req, res, id) {
+  const productId = parseInt(id);
+  const body = await getRequestBody(req);
+  const updates = JSON.parse(body);
 
-  if (keys.length === 0) {
+  if (!updates || typeof updates !== 'object' || Object.keys(updates).length === 0) {
     res.statusCode = 400;
-    return res.end('No fields to update');
+    return res.end('No Input');
   }
 
-  const sqlSet = keys.map(key => `${key} = ?`).join(', ');
-  const values = keys.map(key => updates[key]);
-  
-  values.push(id);
+  try {
+    if (Array.isArray(updates.tags)) {
+      updates.tags = updates.tags.join(':');
+    }
 
-  const sql = `UPDATE products SET ${sqlSet} WHERE id = ?`;
+    const productKeys = Object.keys(updates).filter(key => key !== 'images' && key !== 'creatorId');
 
-  db.query(sql, values, (err) => {
-    if (err) {
-      res.statusCode = 500;
-      return res.end('Database error');
+    if (productKeys.length > 0) {
+      const productSqlSet = productKeys.map(key => `${key} = ?`).join(', ');
+      const productValues = productKeys.map(key => updates[key]);
+      productValues.push(productId);
+
+      const updateProductSql = `UPDATE products SET ${productSqlSet} WHERE id = ?`;
+      const [productResult] = await db.query(updateProductSql, productValues);
+
+      if (productResult.affectedRows === 0) {
+        res.statusCode = 404;
+        return res.end('Product Not Found');
+      }
+    }
+
+    if ('images' in updates) {
+      const imagesValue = updates.images;
+
+      const [[existingImages]] = await db.query('SELECT id FROM images WHERE product_id = ?', [productId]);
+
+      if (existingImages) {
+        await db.query('UPDATE images SET img = ? WHERE product_id = ?', [imagesValue, productId]);
+      } else {
+        await db.query('INSERT INTO images (product_id, img) VALUES (?, ?)', [productId, imagesValue]);
+      }
     }
 
     res.statusCode = 200;
-    res.end('Product updated');
-  });
+    res.end('Product Updated');
+
+  } catch (err) {
+    console.error(err);
+    res.statusCode = 500;
+    res.end('Internal Server Error');
+  }
 }
 
 module.exports = {

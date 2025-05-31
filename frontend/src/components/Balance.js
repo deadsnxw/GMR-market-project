@@ -11,10 +11,25 @@ export default function Balance() {
     }, [user.balance]);
 
     const handleReplenish = (money) => {
-        const newBalance = balance + money;
-        setBalance(newBalance);
-        setUser(prev => ({ ...prev, balance: newBalance }));
-        console.log(`Replenished: $${money}, New Balance: $${newBalance}`);
+        fetch(`/api/balance/${user.id}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ earn: money })
+        })
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error('Server error');
+            }
+            return response.json();
+        })
+        .then((data) => {
+            setUser(prev => ({...prev, balance: data.newBalance}));
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
     }
 
     return (

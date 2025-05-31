@@ -1,162 +1,128 @@
 .product-info {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
-  font-family: 'Arial', sans-serif;
-  color: #333;
-  display: flex;
-  flex-direction: column;
+    max-width: 700px;
+    margin: 40px auto;
+    padding: 20px;
+    border: 2px solid #000;
+    border-radius: 20px;
+    background-color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #000;
 }
 
 .photo-scroller {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 30px;
-  gap: 20px;
-  height: 400px;
-  width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 15px;
 }
 
 .photo-scroller img {
-  width: auto;
-  max-width: 100%;
-  height: 100%;
-  max-height: 400px;
-  object-fit: contain;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    width: 300px;
+    height: 300px;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 2px solid #ccc;
 }
 
 .photo-scroller button {
-  background-color: #f0f0f0;
-  border: none;
-  padding: 10px 15px;
-  font-size: 18px;
-  cursor: pointer;
-  border-radius: 4px;
-  transition: all 0.2s ease;
+    font-size: 24px;
+    padding: 10px;
+    background-color: #fff;
+    border: 2px solid #000;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s;
 }
 
 .photo-scroller button:hover {
-  background-color: #e0e0e0;
-}
-
-.photo-scroller button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-h1 {
-  font-size: 28px;
-  margin-bottom: 15px;
-  color: #222;
-}
-
-.product-info h4 {
-  margin: 0.5rem 0;
-  font-size: 1rem;
-  font-weight: 500;
-  color: green;
-  display: flex;
-  align-items: center;
-}
-
-.product-info h4::before {
-  content: '';
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: red;
-  margin-right: 8px;
-}
-
-.buy-container {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  margin-bottom: 25px;
-  margin-left: auto;
-}
-
-.buy-container h3 {
-  font-size: 24px;
-  margin: 0;
-  color: #2a6496;
-}
-
-.buy-container button {
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  font-size: 16px;
-  cursor: pointer;
-  border-radius: 4px;
-  transition: background-color 0.3s;
-}
-
-.buy-container button:hover {
-  background-color: #45a049;
-}
-
-.product-description {
-  line-height: 1.6;
-  margin-bottom: 25px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid #eee;
-}
-
-.product-tags ul {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.product-tags li {
-  background-color: #f0f0f0;
-  padding: 5px 10px;
-  border-radius: 15px;
-  font-size: 14px;
-  color: #555;
+    background-color: #eee;
 }
 
 .photo-indicator {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 15px;
-  margin-bottom: 25px;
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
 }
 
 .dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background-color: #ccc;
-  cursor: pointer;
-  transition: all 0.3s ease;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: #ccc;
+    cursor: pointer;
+    transition: background-color 0.3s;
 }
 
 .dot.active {
-  background-color: #333;
-  transform: scale(1.2);
+    background-color: #000;
 }
 
-.dot:hover {
-  background-color: #999;
+h1 {
+    font-size: 32px;
+    margin-bottom: 10px;
+}
+
+h4 {
+    font-size: 18px;
+    margin-bottom: 20px;
+    color: #444;
+}
+
+.buy-container {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.buy-container h3 {
+    font-size: 24px;
+}
+
+.buy-container button {
+    padding: 10px 20px;
+    font-size: 18px;
+    border-radius: 10px;
+    border: 2px solid black;
+    cursor: pointer;
+    background-color: white;
+    transition: background-color 0.3s;
+}
+
+.buy-container button:hover:enabled {
+    background-color: #eee;
 }
 
 .buy-container button:disabled {
-  background-color: #95a5a6;
-  color: #ecf0f1;
-  cursor: not-allowed;
-  opacity: 0.7;
-  transform: none;
-  box-shadow: none;
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.product-description {
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 20px;
+    line-height: 1.5;
+    text-align: center;
+}
+
+.product-tags ul {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.product-tags li {
+    padding: 6px 14px;
+    border: 2px solid #000;
+    border-radius: 20px;
+    font-size: 14px;
+    background-color: #fff;
 }

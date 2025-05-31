@@ -1,24 +1,20 @@
 .tag {
-    padding: 6px 12px;
-    background-color: #eee;
+    padding: 8px 16px;
+    border: 2px solid #000;
     border-radius: 20px;
+    background-color: #fff;
+    color: #000;
     cursor: pointer;
-    font-size: 14px;
-    color: #555;
-    transition: background-color 0.2s ease, color 0.2s ease;
-}
-
-.tag.included {
-    background-color: #4caf50;
-    color: white;
+    transition: background-color 0.3s, color 0.3s;
+    font-size: 16px;
 }
 
 .tag:hover {
-  background-color: #d6eaf8;
-  color: #3498db;
-  border-color: #3498db;
+    background-color: #000;
+    color: #fff;
 }
 
-.tag.included:hover {
-  background-color: #2980b9;
+.tag.included {
+    background-color: #000;
+    color: #fff;
 }

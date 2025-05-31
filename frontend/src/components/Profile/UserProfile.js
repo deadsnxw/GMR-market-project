@@ -10,7 +10,7 @@ export default function UserProfile(){
     const navigate = useNavigate();
     const {user} = useContext(UserContext);
 
-    const [purchased, setPurchased] = useState([]);
+    const [products, setProducts] = useState([]);
     const [isEditing, setIsEditing] = useState(false);
     const [loading, setLoading] = useState(true);
     const [currentFirstCard, setCurrentFirstCard] = useState(0);
@@ -19,30 +19,37 @@ export default function UserProfile(){
 
     const cardChangeStrategy ={
         'prev': ()=>{setCurrentFirstCard(prev=>(prev > 0 ? --prev : prev))},
-        'next': ()=>{setCurrentFirstCard(prev=>(prev + productsPerPage < purchased.length ? ++prev : prev))}
+        'next': ()=>{setCurrentFirstCard(prev=>(prev + productsPerPage < products.length ? ++prev : prev))}
     }
 
     useEffect(() => {
+        // fetch("/shortProducts/shortProducts.json")
+        // .then((response) => response.json())
+        // .then((data) => {
+        //     setProducts(data);
+        //     setLoading(false);
+        // });
+
         fetch(`/api/user/${user.id}`)
-        .then((response) => {
-            if (!response.ok) {
-                throw new Error('Server error');
-            }
-            return response.json()})
-        .then((data) => {
-            setPurchased(data);
-            setLoading(false);
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            setLoading(false);
-        });
+          .then((response) => {
+              if (!response.ok) {
+                  throw new Error('Server error');
+              }
+              return response.json()})
+          .then((data) => {
+              setProducts(data);
+              setLoading(false);
+          })
+          .catch(error => {
+              console.error('Error:', error);
+              setLoading(false);
+          });
     }, []);
 
     const getCurrentCards = useCallback(() => {
         const startIndex = currentFirstCard;
-        return purchased.slice(startIndex, startIndex + productsPerPage);
-    }, [currentFirstCard, purchased]);
+        return products.slice(startIndex, startIndex + productsPerPage);
+    }, [currentFirstCard, products]);
 
     const handleCardChange = (strategy) => {
         cardChangeStrategy[strategy]();
@@ -61,18 +68,15 @@ export default function UserProfile(){
                 }
             </div>
             <h1>{user.isShop ? 'Your' : 'Purchased'} Products</h1>
-            {purchased.length !== 0 ? (
-                <div className="products-container">
-                    <button onClick={()=>handleCardChange('prev')}>&lt;</button>
-                    <div className="products">
-                        {getCurrentCards().map(product => (
-                            <ProductCard key={product.id} product={product} />
-                        ))}
-                    </div>
-                    <button onClick={()=>handleCardChange('next')}>&gt;</button>
-                </div> ) : (
-                <div>You Have No Products!</div>
-            )}
+            <div className="products-container">
+                <button onClick={()=>handleCardChange('prev')}>&lt;</button>
+                <div className="products">
+                    {getCurrentCards().map(product => (
+                        <ProductCard key={product.id} product={product} />
+                    ))}
+                </div>
+                <button onClick={()=>handleCardChange('next')}>&gt;</button>
+            </div>
             {user.isShop && <button onClick={()=> navigate('/me/create')}>Add New Product</button>}
         </div>
     );

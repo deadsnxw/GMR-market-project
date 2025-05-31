@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { Navigate, useParams } from "react-router-dom";
 import UserContext from "../context/UserContext";
 
@@ -32,9 +32,29 @@ export function PrivateGuestRoot ({component}){
 export function PrivateShopCreatedRoot ({component}){
     const { productId } = useParams();
     const {user} = useContext(UserContext);
-    const [isOwner, setIsOwner] = useState(true); 
-    //Sendind Get request on /users/user.id/products, after this comparising productId with productIds, we got
+    const [isOwner, setIsOwner] = useState(false); 
 
+    useEffect(() => {
+        fetch(`/api/check/${productId} `, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ userId: user.id })
+        })
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error('Server error');
+            }
+            return response.json()
+        })
+        .then((data) => {
+            setIsOwner(data.isOwner)
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }, []);    
 
-    return user && user.isShop && isOwner ? component : <div>203 not found</div>;
+    return user && isOwner ? component : <div>203 not found</div>;
 }

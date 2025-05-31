@@ -2,63 +2,97 @@ import "../styles/Login.css";
 import {useNavigate} from "react-router-dom";
 import {useContext, useState} from "react";
 import UserContext from "../context/UserContext";
+import Validator from "../validator/Validator";
 
 export default function Login() {
     const navigate = useNavigate();
-    const [loading, setLoading] = useState(false);
     const { setUser } = useContext(UserContext);
-    const [mail, setMail] = useState("");
-    const [password, setPassword] = useState("");
+    const [errors, setErrors] = useState({});
+    const [form, setForm] = useState({
+        email: "",
+        password: "",
+    });
+
+    const validator = new Validator()
+        .addStrategy('email', Validator.email("Valid email is required"))
+        .addStrategy('password', Validator.minLength(6, "Password must be at least 6 characters"));
 
     const handleChange = (e) => {
-        const value = e.target.value;
-        setMail(value);
-    }
+        setForm({ ...form, [e.target.name]: e.target.value });
+    };
 
-    const handlePasswordChange = (e) => {
-        const value = e.target.value;
-        setPassword(value);
-    }
+    const handleLogin = (event) => {
+        event.preventDefault();
 
-    const handleLogin = (e) => {
-        e.preventDefault();
-        setLoading(true);
+        const { isValid, errors } = validator.validateForm(form);
+
+        if (!isValid) {
+            setErrors(errors);
+            return;
+        }
+
+        setErrors({});
         fetch("/api/login", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({
-                email: mail,
-                password: password,
-            }),
+            body: JSON.stringify( form ),
         })
-
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error("Network response was not ok");
-                }
-                return response.json();
-            })
-
-            .then((data) => {
-                setUser(data);
-                setLoading(false);
-            })
-            .catch((error) => {
-                console.error("Error:", error);
-                setLoading(false);
-            });
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error("Network response was not ok");
+            }
+            return response.json();
+        })
+        .then((data) => {
+            setUser(data);
+        })
+        .catch((error) => {
+            console.error("Error:", error);
+        });
     }
 
-    if(loading) return <div>Loading...</div>
+    // const handleLogin = (event) => {
+    //     event.preventDefault();
+
+    //     const { isValid, errors } = validator.validateForm(form);
+
+    //     if (!isValid) {
+    //         setErrors(errors);
+    //         return;
+    //     }
+
+    //     setErrors({});
+    //     fetch("/user.json")
+    //         .then((response) => response.json())
+    //         .then((data) => {
+    //             setUser(data);
+    //         });
+    // }
 
     return (
         <div className="login">
             <h1>Login</h1>
             <form onSubmit={handleLogin}>
-                <input type="text" placeholder="Email" value={mail} onChange={handleChange}/>
-                <input type="password" placeholder="Password" value={password} onChange={handlePasswordChange}/>
+                <input
+                    type="text"
+                    name="email"
+                    placeholder="Email"
+                    value={form.email}
+                    onChange={handleChange}
+                />
+                    {errors.email && <p className="error">{errors.email}</p>}
+
+                <input
+                    type="password"
+                    name="password"
+                    placeholder="Password"
+                    value={form.password}
+                    onChange={handleChange}
+                />
+                    {errors.password && <p className="error">{errors.password}</p>}
+
                 <button type="submit">Login</button>
                 <span onClick={() => navigate("/Register")}>Don't have an account ?</span>
             </form>

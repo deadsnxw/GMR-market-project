@@ -1,7 +1,7 @@
 .user-editing input {
   padding: 0.5rem 0.8rem;
-  border: 1px solid #ddd;
-  border-radius: 6px;
+  border: 2px solid #000;
+  border-radius: 8px;
   font-size: 1rem;
   width: 60%;
   transition: border 0.3s ease;
@@ -18,7 +18,7 @@
   font-size: 0.9rem;
 }
 
-button {
+.user-editing button {
   padding: 0.7rem 1.2rem;
   margin-right: 1rem;
   border: none;
@@ -29,15 +29,15 @@ button {
   font-weight: 500;
 }
 
-button:hover {
+.user-editing button:hover {
   transform: translateY(-1px);
 }
 
-button:active {
+.user-editing button:active {
   transform: translateY(0);
 }
 
-button:focus {
+.user-editing button:focus {
   outline: none;
 }
 

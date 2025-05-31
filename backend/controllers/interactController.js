@@ -1,115 +1,98 @@
 const db = require('../config/database');
+const tagList = require('../config/tags');
 
-function buy_check(req, res, id) {
-  const productId = parseInt(id);
-  const userId = req.body.id;
-  const sql = 'SELECT is_shop FROM users WHERE id = ?'
-
-  db.query(sql, [userId], (err, results) => {
-    if (err) {
-      res.statusCode = 500;
-      return res.end('Database error');
-    }
-
-    if (results.length === 0) {
-      res.statusCode = 404;
-      return res.end('User not found');
-    }
-
-    const role = results[0].is_shop;
-
-    if (role === 0) {
-      return buy(req, res, productId, userId);
-    }
-
-    else if (role === 1) {
-      return check(req, res, productId, userId);
-    }
-  });
-}
-
-function buy(req, res, productId, userId) {
-  const sqlPrice = `SELECT price FROM products WHERE id = ?`;
-  const sqlAmount = 'UPDATE products SET amount = amount - 1 WHERE id = ?'
-  const sqlBalance = 'UPDATE users SET balance = balance - ? WHERE id = ?'
-  const sqlStory = 'UPDATE users SET purchase_story = CONCAT(purchase_story, ?) WHERE id = ?'
-
-  db.query(sqlPrice, [productId], (err, results) => {
-    if (err) {
-      res.statusCode = 500;
-      return res.end('Database error');
-    }
-
-    if (results.length === 0) {
-      res.statusCode = 404;
-      return res.end('Product not found');
-    }
-
-    const price = results[0].price;
-
-    db.query(sqlAmount, [productId], (err, results) => {
-      if (err) {
-        res.statusCode = 500;
-        return res.end('Database error');
-      }
-
-      if (results.length === 0) {
-        res.statusCode = 404;
-        return res.end('Product not found');
-      }
-    
-      db.query(sqlBalance, [price, userId], (err, results) => {
-        if (err) {
-          res.statusCode = 500;
-          return res.end('Database error');
-        }
-
-        if (results.length === 0) {
-          res.statusCode = 404;
-          return res.end('User not found');
-        }
-
-        db.query(sqlStory, [`:${productId}`, userId], (err, results) => {
-          if (err) {
-            res.statusCode = 500;
-            return res.end('Database error');
-          }
-
-          if (results.length === 0) {
-            res.statusCode = 404;
-            return res.end('User not found');
-          }
-
-          res.statusCode = 200;
-          res.end();
-        });
-      });
+function getRequestBody(req) {
+  return new Promise((resolve, reject) => {
+    let data = '';
+    req.on('data', chunk => {
+      data += chunk;
     });
+    req.on('end', () => resolve(data));
+    req.on('error', err => reject(err));
   });
 }
 
-function check(req, res, productId, userId) {
-  const sql = 'SELECT user_id FROM products WHERE id = ?';
+async function buy(req, res, id) {
+  try {
+    const body = await getRequestBody(req);
+    const { userId } = JSON.parse(body);
+    const productId = parseInt(id);
 
-  db.query(sql, [productId], (err, results) => {
-    if (err) {
-      res.statusCode = 500;
-      return res.end('Database error');
-    }
+    const sqlPrice = `SELECT price FROM products WHERE id = ?`;
+    const sqlAmount = 'UPDATE products SET amount = amount - 1 WHERE id = ?';
+    const sqlChangeBalance = 'UPDATE users SET balance = balance - ? WHERE id = ?';
+    const sqlStory = 'UPDATE users SET purchase_story = CONCAT(purchase_story, ?) WHERE id = ?';
+    const sqlNewBalance = 'SELECT balance FROM users WHERE id = ?';
 
-    if (results.length === 0) {
+    const [[result]] = await db.query(sqlPrice, [productId]);
+
+    if (!result) {
       res.statusCode = 404;
-      return res.end('Product not found');
+      return res.end('Product Not Found');
     }
 
-    const isOwner = userId === results[0].user_id;
+    const price = result.price;
+
+    await db.query(sqlAmount, [productId]);
+    await db.query(sqlChangeBalance, [price, userId]);
+    await db.query(sqlStory, [`:${productId}`, userId]);
+
+    const [[balance]] = await db.query(sqlNewBalance, [userId]);
+     
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify( balance ));
+
+  } catch (err) {
+    console.error(err);
+    res.statusCode = 500;
+    res.end('Internal Server Error');
+  }
+}
+
+async function check(req, res, id) {
+  try {
+    const body = await getRequestBody(req);
+    const { userId } = JSON.parse(body);
+    const productId = parseInt(id);
+
+    const sql = 'SELECT user_id FROM products WHERE id = ?';
+
+    const [[result]] = await db.query(sql, [productId]);
+
+    if (!result) {
+      res.statusCode = 404;
+      return res.end('Product Not Found');
+    }
+
+    const isOwner = result.user_id === userId;
 
     res.statusCode = 200;
     res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify({isOwner: isOwner}));
-  });
+    res.end(JSON.stringify({ isOwner: isOwner }));
+
+  } catch (err) {
+    console.error(err);
+    res.statusCode = 500;
+    res.end('Internal Server Error');
+  }
+}
+
+async function onEdit(req, res) {
+  try {
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify( tagList ));
+
+  } catch (err) {
+    console.error(err);
+    res.statusCode = 500;
+    res.end('Internal Server Error');
+  }
 }
 
 module.exports = {
-  buy_check
+  buy,
+  check,
+  onEdit
 };

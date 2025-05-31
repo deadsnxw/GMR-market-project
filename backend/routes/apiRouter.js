@@ -23,23 +23,23 @@ const staticRoutes = [
   },
   {
     method: 'POST',
-    regexp: /^\/api\/registration$/,
+    regexp: /^\/api\/register$/,
     command: routeWithMW(authController.registration)
-  },
+  },  
   {
-    method: 'PATCH',
-    regexp: /^\/api\/balance$/,
-    command: routeWithMW(balanceController.balance)
-  },
-  {
-    method: 'GET',
+    method: 'POST',
     regexp: /^\/api\/main$/,
-    command: routeWithMW(presentController.getAllProducts)
+    command: routeWithMW(presentController.getProductsByTags)
   },
   {
     method: 'POST',
     regexp: /^\/api\/create$/,
     command: routeWithMW(productController.create)
+  },
+  {
+    method: 'GET',
+    regexp: /^\/api\/onEdit$/,
+    command: routeWithMW(interactController.onEdit)
   }
 ];
 
@@ -60,11 +60,6 @@ const dynamicRoutes = [
     command: routeWithMW(presentController.getProductById)
   },
   {
-    method: 'POST',
-    regexp: /^\/api\/product\/([^/]+)$/,
-    command: routeWithMW(interactController.buy_check)
-  },
-  {
     method: 'DELETE',
     regexp: /^\/api\/product\/([^/]+)$/,
     command: routeWithMW(productController.remove)
@@ -73,6 +68,21 @@ const dynamicRoutes = [
     method: 'PATCH',
     regexp: /^\/api\/product\/([^/]+)$/,
     command: routeWithMW(productController.patch)
+  },
+  {
+    method: 'POST',
+    regexp: /^\/api\/buy\/([^/]+)$/,
+    command: routeWithMW(interactController.buy)
+  },
+  {
+    method: 'POST',
+    regexp: /^\/api\/check\/([^/]+)$/,
+    command: routeWithMW(interactController.check)
+  },
+  {
+    method: 'PATCH',
+    regexp: /^\/api\/balance\/([^/]+)$/,
+    command: routeWithMW(balanceController.balance)
   }
 ];
 

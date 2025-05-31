@@ -4,8 +4,8 @@ import UserContext from "../context/UserContext";
 import '../styles/ProductInfo.css'
 
 export default function ProductInfo(){
+    const {user, setUser} = useContext(UserContext);
 
-    const {user} = useContext(UserContext);
     const { productId } = useParams();
     const navigate = useNavigate();
 
@@ -13,20 +13,51 @@ export default function ProductInfo(){
     const [loading, setLoading] = useState(true);
     const [currentPhoto, setCurrentPhoto] = useState(0);
 
-    const shouldShowBuyButton = user && !user.isShop;
+    const shouldShowBuyButton = !user || (user && !user.isShop);
 
     const purchaseStrategys = {
-        'user': (product) =>{console.log(user.balance >= product.price ? 'Purchased' : 'Not Enough Money');},
+        'user': (product) =>{
+            if(user.balance >= product.price) {
+                fetch(`/api/buy/${productId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ userId: user.id })
+                })
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error('Server error');
+                    }
+                    return response.json();
+                })
+                .then((data) => {
+                    setUser(prev => ({...prev, balance: data.balance}));
+                    setProduct(prev => ({...prev, amount: --prev.amount}))
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            }
+            console.log(user.balance >= product.price ? 'Purchased' : 'Not Enough Money');},
         'guest': (product) =>{navigate('/login');}
     }
 
     useEffect(()=>{
+        // fetch("/product.json")
+        // .then((response) => response.json())
+        // .then((data) => {
+        //     setProduct(data);
+        //     setLoading(false);
+        // });
+        
         fetch(`/api/product/${productId}`)
         .then((response) => {
             if (!response.ok) {
                 throw new Error('Server error');
             }
-            return response.json()})
+            return response.json()
+        })
         .then((data) => {
             setProduct(data);
             setLoading(false);
@@ -79,6 +110,7 @@ export default function ProductInfo(){
             <div className="buy-container">
                 <h3>{product.price}$</h3>
                 {shouldShowBuyButton && <button onClick={handleBuy} disabled={!product.amount}>Buy</button>}
+                {user && user.id === product.creatorId && <button onClick={() => navigate(`/product/${product.id}/edit`)}>Edit</button>}
             </div>
             <div className="product-description">{product.description}</div>
             <div className="product-tags">
