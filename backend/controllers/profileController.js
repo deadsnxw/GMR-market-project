@@ -157,7 +157,6 @@ async function getProfile(req, res, id) {
     res.end('Internal Server Error');
   }
 }
-
 async function patch(req, res, id) {
   const userId = parseInt(id);
   const body = await getRequestBody(req);
@@ -168,16 +167,34 @@ async function patch(req, res, id) {
     return res.end('No Input');
   }
 
-  const keys = Object.keys(updates);
-
-  const values = keys.map(k => updates[k]);
-  const sqlSet = keys.map(k => `${k} = ?`).join(', ');
-  
-  values.push(userId);
-
-  const sql = `UPDATE users SET ${sqlSet} WHERE id = ?`;
-
   try {
+    if (updates.password && updates.newPassword) {
+      const [[user]] = await db.query('SELECT password_hash FROM users WHERE id = ?', [userId]);
+
+      if (!user) {
+        res.statusCode = 404;
+        return res.end('User Not Found');
+      }
+
+      if (updates.password !== user.password_hash) {
+        res.statusCode = 403;
+        return res.end('Incorrect Password');
+      }
+
+      updates.password_hash = updates.newPassword;
+    }
+
+    const keys = Object.keys(updates).filter(key => key !== 'password' && key !== 'newPassword');
+    if (keys.length === 0) {
+      res.statusCode = 400;
+      return res.end('No valid fields to update');
+    }
+
+    const values = keys.map(k => updates[k]);
+    const sqlSet = keys.map(k => `${k} = ?`).join(', ');
+    values.push(userId);
+
+    const sql = `UPDATE users SET ${sqlSet} WHERE id = ?`;
     const [result] = await db.query(sql, values);
 
     if (result.affectedRows === 0) {
@@ -194,6 +211,7 @@ async function patch(req, res, id) {
     res.end('Internal Server Error');
   }
 }
+
 
 module.exports = {
   getProfile,

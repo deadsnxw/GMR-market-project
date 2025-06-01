@@ -3,6 +3,7 @@ import {useNavigate} from "react-router-dom";
 import {useContext, useState} from "react";
 import UserContext from "../context/UserContext";
 import Validator from "../validator/Validator";
+import {api} from "../services/api";
 
 export default function Login() {
     const navigate = useNavigate();
@@ -21,7 +22,7 @@ export default function Login() {
         setForm({ ...form, [e.target.name]: e.target.value });
     };
 
-    const handleLogin = (event) => {
+    const handleLogin = async (event) => {
         event.preventDefault();
 
         const { isValid, errors } = validator.validateForm(form);
@@ -32,44 +33,14 @@ export default function Login() {
         }
 
         setErrors({});
-        fetch("/api/login", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify( form ),
-        })
-        .then((response) => {
-            if (!response.ok) {
-                throw new Error("Network response was not ok");
-            }
-            return response.json();
-        })
-        .then((data) => {
-            setUser(data);
-        })
-        .catch((error) => {
-            console.error("Error:", error);
-        });
+        try {
+            const userData = await api.login(form);
+            setUser(userData);
+            navigate("/");
+        } catch (error) {
+            console.error("Login failed:", error);
+        }
     }
-
-    // const handleLogin = (event) => {
-    //     event.preventDefault();
-
-    //     const { isValid, errors } = validator.validateForm(form);
-
-    //     if (!isValid) {
-    //         setErrors(errors);
-    //         return;
-    //     }
-
-    //     setErrors({});
-    //     fetch("/user.json")
-    //         .then((response) => response.json())
-    //         .then((data) => {
-    //             setUser(data);
-    //         });
-    // }
 
     return (
         <div className="login">

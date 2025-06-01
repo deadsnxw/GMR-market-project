@@ -1,35 +1,18 @@
 import "../styles/Balance.css"
-import {useState, useContext, useEffect} from "react";
+import {useContext} from "react";
 import UserContext from "../context/UserContext";
+import {api} from "../services/api"
 
 export default function Balance() {
     const {user, setUser} = useContext(UserContext);
-    const [balance, setBalance] = useState(user.balance);
 
-    useEffect(() => {
-        setBalance(user.balance);
-    }, [user.balance]);
-
-    const handleReplenish = (money) => {
-        fetch(`/api/balance/${user.id}`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ earn: money })
-        })
-        .then((response) => {
-            if (!response.ok) {
-                throw new Error('Server error');
-            }
-            return response.json();
-        })
-        .then((data) => {
-            setUser(prev => ({...prev, balance: data.newBalance}));
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
+    const handleReplenish = async (earn) => {
+        try {
+            const balanceData = await api.updateBalance(user.id, {earn});
+            setUser(prev => ({...prev, balance: balanceData.newBalance}));
+        } catch (error) {
+            console.error("Updating error:", error);
+        }
     }
 
     return (

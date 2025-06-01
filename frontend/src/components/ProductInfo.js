@@ -1,14 +1,14 @@
 import React, { useEffect, useState, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import UserContext from "../context/UserContext";
-import '../styles/ProductInfo.css'
+import '../styles/ProductInfo.css';
+import {api} from "../services/api";
 
 export default function ProductInfo(){
     const {user, setUser} = useContext(UserContext);
-
     const { productId } = useParams();
     const navigate = useNavigate();
-
+    
     const [product, setProduct] = useState({});
     const [loading, setLoading] = useState(true);
     const [currentPhoto, setCurrentPhoto] = useState(0);
@@ -16,56 +16,32 @@ export default function ProductInfo(){
     const shouldShowBuyButton = !user || (user && !user.isShop);
 
     const purchaseStrategys = {
-        'user': (product) =>{
+        'user': async (product) =>{
             if(user.balance >= product.price) {
-                fetch(`/api/buy/${productId}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ userId: user.id })
-                })
-                .then((response) => {
-                    if (!response.ok) {
-                        throw new Error('Server error');
-                    }
-                    return response.json();
-                })
-                .then((data) => {
-                    setUser(prev => ({...prev, balance: data.balance}));
-                    setProduct(prev => ({...prev, amount: --prev.amount}))
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
+                try {
+                    const buyData = await api.buyProduct(productId, user.id);
+                    setUser(prev => ({...prev, balance: buyData.balance}));
+                    setProduct(prev => ({...prev, amount: --prev.amount}));
+                } catch (error) {
+                    console.error("Buing error:", error);
+                }
             }
-            console.log(user.balance >= product.price ? 'Purchased' : 'Not Enough Money');},
+        },
         'guest': (product) =>{navigate('/login');}
     }
 
-    useEffect(()=>{
-        // fetch("/product.json")
-        // .then((response) => response.json())
-        // .then((data) => {
-        //     setProduct(data);
-        //     setLoading(false);
-        // });
-        
-        fetch(`/api/product/${productId}`)
-        .then((response) => {
-            if (!response.ok) {
-                throw new Error('Server error');
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const productData = await api.getProduct(productId);
+                setProduct(productData);
+                setLoading(false);
+            } catch (error) {
+                console.error("Fetching error:", error);
+                setLoading(false);
             }
-            return response.json()
-        })
-        .then((data) => {
-            setProduct(data);
-            setLoading(false);
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            setLoading(false);
-        });
+        }
+        fetchData();
     }, []);
 
 

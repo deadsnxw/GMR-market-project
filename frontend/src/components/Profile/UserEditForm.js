@@ -2,6 +2,7 @@ import React, {useState, useContext} from "react";
 import UserContext from "../../context/UserContext";
 import "../../styles/UserEditForm.css";
 import Validator from "../../validator/Validator";
+import {api} from "../../services/api";
 
 export default function UserEditForm ({ setIsEditing }){
     const {user, setUser} = useContext(UserContext);
@@ -21,8 +22,8 @@ export default function UserEditForm ({ setIsEditing }){
     .addStrategy('newPassword', value => value && value.length < 6 ? `New password must be at least 6 characters` : null)
     .addStrategy('password', value => form.newPassword && value.length < 6 ? 'Enter current password to confirm password change' : null)
 
-    const handleConfirm = () =>{
-        let packageForm = form;
+    const handleConfirm = async () =>{
+        let packageForm = { ...form };
         const { isValid, errors } = validator.validateForm(form);
   
         if (!isValid) {
@@ -39,26 +40,13 @@ export default function UserEditForm ({ setIsEditing }){
             };
         }
 
-        fetch(`/api/user/${user.id}`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(packageForm)
-        })
-        .then((response) => {
-            if (!response.ok) {
-                throw new Error('Server error');
-            }
+        try {
+            await api.updateUser(user.id, packageForm);
             setUser(prev => ({...prev, name: form.username, mail: form.email}));
             setIsEditing(false);
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
-        console.log('sending patch request!');
-        // setUser(prev => ({...prev, name: form.name, mail: form.mail}));
-        // setIsEditing(false);
+        } catch (error) {
+            console.error("Updating failed:", error);
+        }
     };
     
     const handleCancel = () =>{
@@ -67,10 +55,7 @@ export default function UserEditForm ({ setIsEditing }){
     
     const handleChange = (e) =>{
         const field = e.target.name;
-        setForm(prev => ({
-            ...prev,
-            [field]: e.target.value
-        }));
+        setForm(prev => ({...prev, [field]: e.target.value}));
     };
 
     return(
@@ -79,11 +64,11 @@ export default function UserEditForm ({ setIsEditing }){
                 <li>
                     Name: <input name="username" type="text" value={form.username} onChange={handleChange}></input>
                 </li>
-                {errors.name && <span className="error">{errors.name}</span>}
+                {errors.username && <span className="error">{errors.username}</span>}
                 <li>
-                    Mail: <input name="email" type="mail" value={form.email} onChange={handleChange}></input>
+                    Mail: <input name="email" type="email" value={form.email} onChange={handleChange}></input>
                 </li>
-                {errors.mail && <span className="error">{errors.mail}</span>}
+                {errors.email && <span className="error">{errors.email}</span>}
                 <li>
                     New Password: <input name="newPassword" type="password" value={form.newPassword} onChange={handleChange} placeholder="Leave it empty, if you don`t want to change password"></input>
                 </li>

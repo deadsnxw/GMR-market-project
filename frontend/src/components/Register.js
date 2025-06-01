@@ -2,6 +2,7 @@ import "../styles/Login.css";
 import {useNavigate} from "react-router-dom";
 import {useState} from "react";
 import Validator from "../validator/Validator";
+import {api} from "../services/api";
 
 export default function Register() {
     const navigate = useNavigate();
@@ -27,7 +28,7 @@ export default function Register() {
         setForm({ ...form, [e.target.name]: e.target.value });
     };
 
-    const handleRegister = (event) => {
+    const handleRegister = async (event) => {
         event.preventDefault();
         const { isValid, errors } = validator.validateForm(form);
 
@@ -37,23 +38,13 @@ export default function Register() {
         }
 
         setErrors({});
-        fetch("/api/register", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify( form ),
-        })
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error("Network response was not ok");
-                }
-                navigate("/Login");
-            })
-            .catch ((error) => {
-                console.error("Error during registration:", error);
-                setErrors({general: "Registration failed. Please try again."});
-            })
+        try {
+            await api.register(form);
+            navigate("/login");
+        } catch (error) {
+            console.error("Registration failed:", error);
+            setErrors({general: "Registration failed. Please try again."});
+        }
     }
 
 

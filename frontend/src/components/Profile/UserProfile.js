@@ -5,6 +5,7 @@ import UserEditForm from "./UserEditForm";
 import UserInfo from "./UserInfo";
 import '../../styles/UserProfile.css';
 import { useNavigate } from "react-router-dom";
+import {api} from "../../services/api";
 
 export default function UserProfile(){
     const navigate = useNavigate();
@@ -23,27 +24,16 @@ export default function UserProfile(){
     }
 
     useEffect(() => {
-        // fetch("/shortProducts/shortProducts.json")
-        // .then((response) => response.json())
-        // .then((data) => {
-        //     setProducts(data);
-        //     setLoading(false);
-        // });
-
-        fetch(`/api/user/${user.id}`)
-          .then((response) => {
-              if (!response.ok) {
-                  throw new Error('Server error');
-              }
-              return response.json()})
-          .then((data) => {
-              setProducts(data);
-              setLoading(false);
-          })
-          .catch(error => {
-              console.error('Error:', error);
-              setLoading(false);
-          });
+        const fetchData = async () => {
+            try {
+                const productsData = await api.getProducts(user.id);
+                setProducts(productsData);
+                setLoading(false);
+            } catch (error) {
+                console.error("Updating failed:", error);
+            }
+        }
+        fetchData();
     }, []);
 
     const getCurrentCards = useCallback(() => {

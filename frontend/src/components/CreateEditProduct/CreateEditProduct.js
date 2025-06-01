@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import ImageComponent from "./ImageComponent";
+import ImageFieldComponent from "./ImageFieldComponent";
 import TagComponent from "./TagComponent";
 import Validator from "../../validator/Validator";
 import UserContext from "../../context/UserContext"
+import {api} from "../../services/api"
 import "../../styles/CreateEditProduct.css";
-
-// const productTags = ["electronics", "clothing", "home", "kitchen", "furniture", "smartphone", "laptop", "headphones", "wearable", "gadget", "men", "women", "kids", "summer", "winter", "appliances", "decor", "cookware", "utensils", "storage", "sports", "outdoor", "fitness", "beauty", "skincare", "organic", "sustainable", "luxury", "budget", "premium", "new", "sale", "bestseller", "limited"];
 
 export default function CreateEditProduct({ isEditing = false }) {
   const navigate = useNavigate();
@@ -35,78 +34,39 @@ export default function CreateEditProduct({ isEditing = false }) {
 
   useEffect(() => {
     const fetchData = async () => {
-        try {
-            const tagResponse = await fetch('/api/onEdit');
-            if (!tagResponse.ok) {
-                throw new Error('Server error (tags)');
-            }
-            const tagData = await tagResponse.json();
-            setProductTags(tagData);
+      try {
+        const tagData = await api.getTags();
+        setProductTags(tagData);
 
-            if (isEditing) {
-                const productResponse = await fetch(`/api/product/${productId}`);
-                if (!productResponse.ok) {
-                    throw new Error('Server error (product)');
-                }
-                const productData = await productResponse.json();
-                setForm(productData);
-            }
-        } catch (error) {
-            console.error('Error:', error);
-        } finally {
-            setLoading(false);
+        if (isEditing) {
+          const productData = await api.getProduct(productId);
+          setForm(productData);
         }
-    };
+
+      } catch (error) {
+        console.error("Fetching error:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
 
     fetchData();
-}, [isEditing]);
-
-
-  const handleImageUpload = (files) => {
-    const imageFiles = Array.from(files).filter((file) =>
-      file.type.startsWith("image/")
-    );
-    if (imageFiles.length === 0) return;
-
-    const remainingSlots = 6 - form.images.length;
-    if (remainingSlots <= 0) return;
-
-    const filesToUpload = imageFiles.slice(0, remainingSlots);
-
-    filesToUpload.forEach((file) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        if (!form.images.includes(e.target.result)) {
-          setForm((prev) => ({
-            ...prev,
-            images: [...prev.images, e.target.result],
-          }));
-        }
-      };
-      reader.readAsDataURL(file);
-    });
-  };
+  }, [isEditing]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleDelete = () => {
-    fetch(`/api/product/${productId}`, {
-        method: 'DELETE',
-    })
-    .then((response) => {
-        if (!response.ok) {
-            throw new Error('Server error');
-        }
-        navigate(`/me`);
-    })
-    .catch(error => {
-        console.error('Error:', error);
-    });
+  const handleDelete = async () => {
+    try {
+      await api.deleteProduct(productId);
+      navigate("/me");
+    } catch (error) {
+      console.error("Deletion failed:", error);
+    }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const { isValid, errors } = validator.validateForm(form);
 
@@ -117,41 +77,20 @@ export default function CreateEditProduct({ isEditing = false }) {
 
     setErrors({});
     if(isEditing){
-      fetch(`/api/product/${productId}`, {
-          method: 'PATCH',
-          headers: {
-              'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(form)
-      })
-      .then((response) => {
-          if (!response.ok) {
-              throw new Error('Server error');
-          }
-          navigate(`/product/${productId}`)
-      })
-      .catch(error => {
-          console.error('Error:', error);
-      });
+      try {
+        await api.updateProduct(productId, form);
+        navigate(`/product/${productId}`);
+      } catch (error) {
+        console.error("Updating failed:", error);
+      }
     } else {
-      fetch(`/api/create `, {
-          method: 'POST',
-          headers: {
-              'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ ...form, userId: user.id})
-      })
-      .then((response) => {
-          if (!response.ok) {
-              throw new Error('Server error');
-          }
-          navigate(`/me`)
-      })
-      .catch(error => {
-          console.error('Error:', error);
-      });
+      try {
+        await api.createProduct({...form, userId: user.id});
+        navigate("/me");
+      } catch (error) {
+        console.error("Creating failed:", error);
+      }
     }
-    console.log(isEditing ? "Updating product" : "Creating product");
   };
 
   if (loading) return <div>Loading...</div>;
@@ -160,37 +99,7 @@ export default function CreateEditProduct({ isEditing = false }) {
     <form className="create-product" onSubmit={handleSubmit}>
       <h1>{isEditing ? "Edit" : "Create"} Product</h1>
 
-      <div className="image-upload">
-        <p>Product images (max 6):</p>
-        <div className="image-preview">
-          {form.images.map((img) => (
-            <ImageComponent key={img} setForm={setForm} image={img} />
-          ))}
-        </div>
-
-        {form.images.length < 6 && (
-          <label
-            className="upload-area"
-            onDragOver={(e) => e.preventDefault()}
-            onDrop={(e) => {
-              e.preventDefault();
-              if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-                handleImageUpload(e.dataTransfer.files);
-              }
-            }}
-          >
-            <input
-              type="file"
-              multiple
-              accept="image/*"
-              onChange={(e) => handleImageUpload(e.target.files)}
-              style={{ display: "none" }}
-            />
-            Drag & drop images here or click to select
-          </label>
-        )}
-        {errors.images && <div className="error">{errors.images}</div>}
-      </div>
+      <ImageFieldComponent images={form.images} setForm={setForm} error={errors.images}/>
 
       <div className="form-group">
         <label>Product Name</label>

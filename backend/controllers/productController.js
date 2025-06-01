@@ -94,14 +94,13 @@ async function patch(req, res, id) {
     if ('images' in updates) {
       const imagesValue = updates.images;
 
-      const [[existingImages]] = await db.query('SELECT id FROM images WHERE product_id = ?', [productId]);
+      await db.query('DELETE FROM images WHERE product_id = ?', [productId]);
 
-      if (existingImages) {
-        await db.query('UPDATE images SET img = ? WHERE product_id = ?', [imagesValue, productId]);
-      } else {
-        await db.query('INSERT INTO images (product_id, img) VALUES (?, ?)', [productId, imagesValue]);
+      for (const image of imagesValue) {
+        await db.query('INSERT INTO images (product_id, img) VALUES (?, ?)', [productId, image]);
       }
     }
+
 
     res.statusCode = 200;
     res.end('Product Updated');

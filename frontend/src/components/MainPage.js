@@ -1,77 +1,28 @@
 import "../styles/MainPage.css";
 import React, {useState, useEffect} from "react";
 import ProductCard from "./ProductCard";
+import {api} from "../services/api";
 
 export default function MainPage() {
-    // const tags = ["elecronic", "bomba", "home", "kitchen", "furniture", "smartphone", "laptop", "headphones", "wearable", "gadget", "men", "women", "kids", "summer", "winter", "appliances", "decor", "cookware", "utensils", "storage", "sports", "outdoor", "fitness", "beauty", "skincare", "organic", "sustainable", "luxury", "budget", "premium", "new", "sale", "bestseller", "limited"];
     const [productTags, setProductTags] = useState([]);
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [tags, setTags] = useState([]);
 
     useEffect(() => {
-        fetch("/api/main", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({tags: productTags}),
-        })
-        .then((response) => {
-            if (!response.ok) {
-                throw new Error("Network response was not ok");
+        const fetchData = async () => {
+            try {
+                const mainData = await api.getMain({tags: productTags});
+                setProducts(mainData.products);
+                setTags(mainData.tagList);              //maybe split it into 2 different fetches?
+                setLoading(false);
+            } catch (error) {
+                console.error("Fetching error:", error);
+                setLoading(false);
             }
-            return response.json();
-        })
-        .then((data) => {
-            setProducts(data.products);
-            setTags(data.tagList);
-            console.log("Fetched products:", data);
-            setLoading(false);
-        })
-        .catch((error) => {
-            console.error("Error fetching products:", error);
-            setLoading(false);
-        });
-
+        }
+        fetchData();
     }, [productTags]);
-
-    // useEffect(() => {
-    //     fetch("/main.json")
-    //         .then((response) => {
-    //             if (!response.ok) {
-    //                 throw new Error("Network response was not ok");
-    //             }
-    //             return response.json();
-    //         })
-    //         .then((data) => {
-    //             setProducts(data);
-    //             console.log("Fetched main data:", data);
-    //             setLoading(false);
-    //         })
-    //         .catch((error) => {
-    //             console.error("Error fetching main data:", error);
-    //             setLoading(false);
-    //         });
-
-    //     fetch("/api/main")
-    //         .then((response) => {
-    //             if (!response.ok) {
-    //                 throw new Error("Network response was not ok");
-    //             }
-    //             return response.json();
-    //         })
-    //         .then((data) => {
-    //             setProducts(data);
-    //             setLoading(false);
-    //         })
-    //         .catch((error) => {
-    //             console.error("Error fetching main data:", error);
-    //             setLoading(false);
-    //         })
-    // }, []);
-
-
 
     const handleCheckboxChange = (event) => {
         const {value, checked} = event.target;
