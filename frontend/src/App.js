@@ -11,6 +11,7 @@ import Balance from "./components/Balance";
 import Login from "./components/Login";
 import Register from "./components/Register";
 import CreateEditProduct from './components/CreateEditProduct/CreateEditProduct';
+import NotFound from './components/NotFound';
 
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
               <Route path='/login' element={<PrivateGuestRoot component={<Login />} />} />
               <Route path='/balance' element={<PrivateUserRoot component={<Balance />} />} />
               <Route path='/register' element={<PrivateGuestRoot component={<Register />} />} />
+              <Route path='*' element={<NotFound/>}/>
             </Routes>
           </UserProvider>
         </Router>

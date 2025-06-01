@@ -14,7 +14,7 @@ export default function MainPage() {
             try {
                 const mainData = await api.getMain({tags: productTags});
                 setProducts(mainData.products);
-                setTags(mainData.tagList);              //maybe split it into 2 different fetches?
+                setTags(mainData.tagList);
                 setLoading(false);
             } catch (error) {
                 console.error("Fetching error:", error);

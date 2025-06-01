@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import UserContext from "../context/UserContext";
+import NotFound from "./NotFound";
 import '../styles/ProductInfo.css';
 import {api} from "../services/api";
 
@@ -11,6 +12,7 @@ export default function ProductInfo(){
     
     const [product, setProduct] = useState({});
     const [loading, setLoading] = useState(true);
+    const [pageFound, setPageFound] = useState(true);
     const [currentPhoto, setCurrentPhoto] = useState(0);
 
     const shouldShowBuyButton = !user || (user && !user.isShop);
@@ -37,7 +39,11 @@ export default function ProductInfo(){
                 setProduct(productData);
                 setLoading(false);
             } catch (error) {
-                console.error("Fetching error:", error);
+                if (error.status === 404) {
+                    setPageFound(false);
+                } else {
+                    console.error("Fetching error:", error);
+                }
                 setLoading(false);
             }
         }
@@ -64,6 +70,7 @@ export default function ProductInfo(){
     }
 
     if (loading) return <div>Loading...</div>;
+    if (!pageFound) return <NotFound/>;
 
     return(
         <div className="product-info">

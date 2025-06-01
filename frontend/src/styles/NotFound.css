@@ -1,0 +1,11 @@
+.not-found {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 90vh;
+  font-size: 2rem;
+  font-weight: bold;
+  background-color: #f0f0f0;
+  text-align: center;
+  flex-direction: column;
+}
