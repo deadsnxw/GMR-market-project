@@ -2,13 +2,18 @@ const API_BASE_URL = '/api';
 
 const handleResponse = async (response) => {
   if (!response.ok) {
-    throw new Error('Server error');
+    let errorText;
+    try {
+      errorText = await response.text();
+    } catch (e) {
+      errorText = response.statusText;
+    }
+    
+    const error = new Error(errorText || 'Server error');
+    error.status = response.status;
+    throw error;
   }
-  try {
-    return await response.json();
-  } catch (e) {
-    return;
-  }
+  return response.json();
 };
 
 

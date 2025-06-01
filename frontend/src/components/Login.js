@@ -38,7 +38,11 @@ export default function Login() {
             setUser(userData);
             navigate("/");
         } catch (error) {
-            console.error("Login failed:", error);
+            if (error.status === 401) {
+                setErrors({password: "Invalid password or email"});
+            } else {
+                console.error("Login failed:", error);
+            }
         }
     }
 

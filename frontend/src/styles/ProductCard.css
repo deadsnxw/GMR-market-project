@@ -1,13 +1,10 @@
 .product-card {
-  width: 220px;
   overflow: hidden;
   border-radius: 10px;
   border: 2px solid black;
   transition: all 0.3s ease;
   cursor: pointer;
   background: white;
-  display: flex;
-  flex-direction: column;
 }
 
 .product-card:hover {

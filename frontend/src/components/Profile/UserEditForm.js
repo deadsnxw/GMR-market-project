@@ -45,7 +45,11 @@ export default function UserEditForm ({ setIsEditing }){
             setUser(prev => ({...prev, name: form.username, mail: form.email}));
             setIsEditing(false);
         } catch (error) {
-            console.error("Updating failed:", error);
+            if (error.status === 403) {
+                setErrors({password: "Invalid password"});
+            } else {
+                console.error("Update failed:", error);
+            }
         }
     };
     

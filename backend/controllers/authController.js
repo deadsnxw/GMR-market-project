@@ -55,7 +55,7 @@ async function registration(req, res) {
     const { username, password, email, isShop } = data;
 
     const balance = isShop ? null : 0.0;
-    const purchase_story = '';
+    const purchase_story = isShop ? null : '';
     const sql = 'INSERT INTO users (username, password_hash, email, is_shop, balance, purchase_story) VALUES (?,?,?,?,?,?)';
 
     await db.query(sql, [username, password, email, isShop, balance, purchase_story]);
