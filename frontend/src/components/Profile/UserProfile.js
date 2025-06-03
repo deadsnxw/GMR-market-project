@@ -16,7 +16,7 @@ export default function UserProfile(){
     const [loading, setLoading] = useState(true);
     const [currentFirstCard, setCurrentFirstCard] = useState(0);
 
-    const productsPerPage = 5;
+    const productsPerPage = 4;
 
     const cardChangeStrategy ={
         'prev': ()=>{setCurrentFirstCard(prev=>(prev > 0 ? --prev : prev))},
@@ -58,7 +58,8 @@ export default function UserProfile(){
                 }
             </div>
             <h1>{user.isShop ? 'Your' : 'Purchased'} Products</h1>
-            <div className="products-container">
+            {products.length === 0 ? <div>You have no products here</div> : 
+            (<div className="products-container">
                 <button onClick={()=>handleCardChange('prev')}>&lt;</button>
                 <div className="products">
                     {getCurrentCards().map(product => (
@@ -66,7 +67,7 @@ export default function UserProfile(){
                     ))}
                 </div>
                 <button onClick={()=>handleCardChange('next')}>&gt;</button>
-            </div>
+            </div>)}
             {user.isShop ? <button onClick={()=> navigate('/me/create')}>Add New Product</button> : null}
         </div>
     );
