@@ -1,6 +1,8 @@
 const API_BASE_URL = '/api';
 
 const handleResponse = async (response) => {
+  const contentType = response.headers.get('content-type');
+
   if (!response.ok) {
     let errorText;
     try {
@@ -8,13 +10,19 @@ const handleResponse = async (response) => {
     } catch (e) {
       errorText = response.statusText;
     }
-    
+
     const error = new Error(errorText || 'Server error');
     error.status = response.status;
     throw error;
   }
-  return response.json();
+
+  if (contentType && contentType.includes('application/json')) {
+    return response.json();
+  } else {
+    return response.text();
+  }
 };
+
 
 
 export const api = {

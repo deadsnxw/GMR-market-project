@@ -1,4 +1,4 @@
-const Command = require('../command/Command');
+const Command = require('../command/command');
 
 const productController = require('../controllers/productController');
 const presentController = require('../controllers/presentController');

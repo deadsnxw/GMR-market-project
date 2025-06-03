@@ -67,7 +67,7 @@ export default function UserProfile(){
                 </div>
                 <button onClick={()=>handleCardChange('next')}>&gt;</button>
             </div>
-            {user.isShop && <button onClick={()=> navigate('/me/create')}>Add New Product</button>}
+            {user.isShop ? <button onClick={()=> navigate('/me/create')}>Add New Product</button> : null}
         </div>
     );
 }
