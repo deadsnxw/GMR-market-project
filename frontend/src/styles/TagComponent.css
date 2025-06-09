@@ -1,0 +1,20 @@
+.tag {
+    padding: 8px 16px;
+    border: 2px solid #000;
+    border-radius: 20px;
+    background-color: #fff;
+    color: #000;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+    font-size: 16px;
+}
+
+.tag:hover {
+    background-color: #000;
+    color: #fff;
+}
+
+.tag.included {
+    background-color: #000;
+    color: #fff;
+}

@@ -1,0 +1,84 @@
+.main-page {
+    display: grid;
+    height: calc(100vh - 70px);
+    overflow: hidden;
+}
+
+.left-panel {
+    width: 15%;
+    height: calc(100vh - 70px);
+    background-color: #181a1b;
+    padding: 20px;
+    position: fixed;
+    top: 70px;
+    left: 0;
+    overflow-y: auto;
+}
+
+.main-panel {
+    margin-left: 250px;
+    padding: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+    background-color: #2f2f2f;
+    height: calc(100vh - 70px);
+    overflow-y: auto;
+    box-sizing: border-box;
+}
+
+.left-panel h2 {
+    color: #f0f0f0;
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.left-panel-content ul {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    list-style-type: none;
+    padding: 0;
+}
+
+.left-panel-content ul li {
+    padding: 10px;
+    margin-bottom: 5px;
+    background-color: #2f2f2f;
+    transition: background-color 0.3s ease;
+}
+
+.left-panel-content ul li:hover {
+    background-color: #f0f0f0;
+    cursor: pointer;
+}
+
+.product-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 250px;
+    height: 350px;
+    box-sizing: border-box;
+    margin: 10px;
+    background-color: #fff;
+    padding: 10px;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.product-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: fill;
+}
+
+.product-card p {
+    margin: 5px 0;
+    color: #333;
+    font-size: 14px;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

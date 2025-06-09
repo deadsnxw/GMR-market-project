@@ -1,0 +1,39 @@
+.image-upload {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+  width: 100%;
+  max-width: 600px;
+}
+
+.image-upload p {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 10px;
+}
+
+.image-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 15px;
+  justify-content: center;
+}
+
+.upload-area {
+  border: 2px dashed #888;
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  background-color: #f8f8f8;
+  color: #333;
+  transition: background-color 0.3s;
+  width: 100%;
+  max-width: 600px;
+}
+
+.upload-area:hover {
+  background-color: #e0e0e0;
+}
