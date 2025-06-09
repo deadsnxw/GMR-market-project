@@ -1,6 +1,17 @@
 # GMR Market Project
 
-> **Goal:** deliver a minimal full-stack marketplace where users can register, top-up balance, create products and buy goods.
+## Goal
+
+Deliver a minimal full-stack marketplace where:
+
+- Users can:
+  - Register an account
+  - Top-up their balance
+  - Purchase products
+
+- Store owners can:
+  - Register a store
+  - Create and manage products
 
 ---
 
