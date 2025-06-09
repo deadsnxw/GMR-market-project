@@ -12,6 +12,7 @@
 5. [Quick Start](#quick-start)  
 6. [Core API Endpoints](#core-api-endpoints)  
 7. [Road-map (Next Steps)](#road-map-next-steps)
+8. [Contributors](#contributors)
 
 ---
 
@@ -23,14 +24,13 @@ GMR Market is a hobby / study project that implements a simple but working e-com
 * **Backend** – Node 18 with the native `http` module, custom routing / middleware and MySQL 8 for persistence.  
 * **Docker Compose** – spins up MySQL + backend in a single command; the CRA dev server runs locally.
 
----
+ ---
 
 ## Main Features 
 
 | Area            | Description                                                                 |
 |-----------------|-----------------------------------------------------------------------------|
-| **Auth**        | Register & login
-                             |
+| **Auth**        | Register & login                                                            |
 | **Catalogue**   | Create / edit / delete product; pagination & tag filters                    |
 | **Balance**     | View current balance, PATCH top-up                                          |
 | **Buying**      | `POST /api/buy/:productId` decreases stock and stores purchase record       |
@@ -47,7 +47,6 @@ GMR Market is a hobby / study project that implements a simple but working e-com
 | Backend   | **Node 18**  |
 | Database  | **MySQL 8** (Docker service `db`js*) |
 | DevOps    | **Docker & Docker Compose** (backend + MySQL)       |
-
 
 ---
 
@@ -70,7 +69,7 @@ GMR-market-project/
 │       ├── context/       # UserContext for auth state
 │       ├── styles/        # .css modules
 │       └── validator/
-├── docker-compose.yml     # MySQL 8 
+├── docker-compose.yml     # Runs both backend and MySQL 8
 └── README.md
 ```
 
@@ -132,5 +131,17 @@ docker compose up --build
 - password-reset email flow  
 - image upload to an object store instead of URL only  
 
+
+---
+
+## Contributors
+
+| Contributor                                        | Role                                                                        |
+|----------------------------------------------------|-----------------------------------------------------------------------------|
+| **[deadsnxw](https://github.com/deadsnxw)**        | Front-end                                                                   |
+| **[Walik23](https://github.com/Walik23)**          | Front-end                                                                   |
+| **[bifynok](https://github.com/bifynok)**          | Back-end                                                                    |
+| **[Cake2Rock](https://github.com/Cake2Rock)**      | Back-end                                                                    |
+| **[REFLAXua](https://github.com/REFLAXua)**        | Data base                                                                   |
 
 ---
